@@ -18,8 +18,24 @@ fun Application.configureRouting() {
             call.respondText("Legal App API is running")
         }
 
+        // Estados routes
         with(DependencyInjection.estadoController) {
             estadoRoutes()
+        }
+
+        // Municipios routes
+        with(DependencyInjection.municipioController) {
+            municipioRoutes()
+        }
+
+        // Usuarios routes (auth + usuarios)
+        with(DependencyInjection.usuarioController) {
+            usuarioRoutes()
+        }
+
+        // Abogados routes
+        with(DependencyInjection.abogadoController) {
+            abogadoRoutes()
         }
     }
 }
