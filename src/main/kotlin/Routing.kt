@@ -37,5 +37,15 @@ fun Application.configureRouting() {
         with(DependencyInjection.abogadoController) {
             abogadoRoutes()
         }
+
+        // Consultas routes
+        with(DependencyInjection.consultaController) {
+            consultaRoutes()
+        }
+
+        // Respuestas routes
+        with(DependencyInjection.respuestaConsultaController) {
+            respuestaConsultaRoutes()
+        }
     }
 }
