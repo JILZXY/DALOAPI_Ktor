@@ -1,5 +1,5 @@
 package com.example.bufete.domain.model
-
+import kotlinx.serialization.Serializable
 @Serializable
 data class CreateBufeteRequest(
     val nombre: String,
