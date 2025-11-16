@@ -10,12 +10,13 @@ class JwtConfig {
     private val audience = "legalapp-users"
     private val validityInMs = 36_000_00 * 24 * 7 // 7 días
 
-    fun generateToken(userId: String, email: String): String {
+    fun generateToken(userId: String, email: String, rolId: Int): String {
         return JWT.create()
             .withAudience(audience)
             .withIssuer(issuer)
             .withClaim("userId", userId)
             .withClaim("email", email)
+            .withClaim("rolId", rolId)
             .withExpiresAt(Date(System.currentTimeMillis() + validityInMs))
             .sign(Algorithm.HMAC256(secret))
     }
