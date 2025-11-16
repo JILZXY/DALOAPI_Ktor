@@ -17,6 +17,16 @@ import com.example.usuario.infrastructure.persistence.UsuarioRepositoryAdapter
 import com.example.usuario.infrastructure.persistence.AbogadoRepositoryAdapter
 import com.example.usuario.infrastructure.web.UsuarioController
 import com.example.usuario.infrastructure.web.AbogadoController
+import com.example.consulta.infrastructure.web.ConsultaController
+import com.example.consulta.application.ConsultaService
+import com.example.consulta.domain.port.ConsultaServicePort
+import com.example.consulta.domain.port.ConsultaRepositoryPort
+import com.example.consulta.infrastructure.persistence.ConsultaRepositoryAdapter
+import com.example.consulta.infrastructure.web.RespuestaConsultaController
+import com.example.consulta.application.RespuestaConsultaService
+import com.example.consulta.domain.port.RespuestaConsultaServicePort
+import com.example.consulta.domain.port.RespuestaConsultaRepositoryPort
+import com.example.consulta.infrastructure.persistence.RespuestaConsultaRepositoryAdapter
 import com.example.shared.security.JwtConfig
 import com.example.shared.security.PasswordHasher
 import java.sql.Connection
@@ -86,5 +96,31 @@ object DependencyInjection {
 
     val abogadoController: AbogadoController by lazy {
         AbogadoController(abogadoService)
+    }
+
+    //Consulta
+    private val consultaRepository: ConsultaRepositoryPort by lazy {
+        ConsultaRepositoryAdapter(connection)
+    }
+
+    val consultaService: ConsultaServicePort by lazy {
+        ConsultaService(consultaRepository)
+    }
+
+    val consultaController: ConsultaController by lazy {
+        ConsultaController(consultaService)
+    }
+
+    //RespuesConsulta
+    private val respuestaConsultaRepository: RespuestaConsultaRepositoryPort by lazy {
+        RespuestaConsultaRepositoryAdapter(connection)
+    }
+
+    val respuestaConsultaService: RespuestaConsultaServicePort by lazy {
+        RespuestaConsultaService(respuestaConsultaRepository)
+    }
+
+    val respuestaConsultaController: RespuestaConsultaController by lazy {
+        RespuestaConsultaController(respuestaConsultaService)
     }
 }
