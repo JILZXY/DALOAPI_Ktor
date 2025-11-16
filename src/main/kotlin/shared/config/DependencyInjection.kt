@@ -10,6 +10,8 @@ import com.example.municipio.infrastructure.web.MunicipioController
 import com.example.municipio.domain.port.MunicipioServicePort
 import com.example.municipio.domain.port.MunicipioRepositoryPort
 import com.example.municipio.infrastructure.persistence.MunicipioRepositoryAdapter
+import com.example.shared.security.JwtConfig
+import com.example.shared.security.PasswordHasher
 import java.sql.Connection
 
 
@@ -17,6 +19,15 @@ object DependencyInjection {
 
     private val connection: Connection by lazy {
         DatabaseConfig.getConnection()
+    }
+
+    // Security
+    val jwtConfig: JwtConfig by lazy {
+        JwtConfig()
+    }
+
+    val passwordHasher: PasswordHasher by lazy {
+        PasswordHasher()
     }
     // Estado
     private val estadoRepository: EstadoRepositoryPort by lazy {
