@@ -2,6 +2,7 @@ package com.example
 
 import com.auth0.jwt.JWT
 import com.auth0.jwt.algorithms.Algorithm
+import com.example.shared.config.DependencyInjection
 import io.ktor.serialization.kotlinx.json.*
 import io.ktor.server.application.*
 import io.ktor.server.auth.*
@@ -11,4 +12,14 @@ import io.ktor.server.response.*
 import io.ktor.server.routing.*
 
 fun Application.configureRouting() {
+    routing {
+        // Health check
+        get("/") {
+            call.respondText("Legal App API is running")
+        }
+
+        with(DependencyInjection.estadoController) {
+            estadoRoutes()
+        }
+    }
 }
