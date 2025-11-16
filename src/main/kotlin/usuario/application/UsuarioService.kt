@@ -43,7 +43,7 @@ class UsuarioService(
         val createdUsuario = usuarioRepository.create(usuario, passwordHash) ?: return null
 
         // Generar token
-        val token = jwtConfig.generateToken(createdUsuario.idUsuario, createdUsuario.email)
+        val token = jwtConfig.generateToken(createdUsuario.idUsuario, createdUsuario.email, createdUsuario.rolId)
 
         return AuthResponse(token, createdUsuario)
     }
@@ -56,7 +56,7 @@ class UsuarioService(
         if (!usuario.activo) return null
 
         // Generar token
-        val token = jwtConfig.generateToken(usuario.idUsuario, usuario.email)
+        val token = jwtConfig.generateToken(usuario.idUsuario, usuario.email, usuario.rolId)
 
         return AuthResponse(token, usuario)
     }
