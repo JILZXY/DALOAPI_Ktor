@@ -6,7 +6,6 @@ import com.example.bufete.domain.port.SolicitudBufeteServicePort
 import com.example.bufete.domain.port.BufeteServicePort
 import com.example.shared.security.authorizeRole
 import io.ktor.http.*
-import io.ktor.server.application.*
 import io.ktor.server.auth.*
 import io.ktor.server.auth.jwt.*
 import io.ktor.server.request.*
