@@ -1,4 +1,4 @@
-package com.example.reporte.domain
+package com.example.reporte.application
 
 import com.example.reporte.domain.model.CreateReporteRequest
 import com.example.reporte.domain.model.Reporte
