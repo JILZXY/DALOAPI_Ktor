@@ -2,8 +2,8 @@ package com.example.bufete.application
 
 import com.example.bufete.domain.model.CalificacionBufete
 import com.example.bufete.domain.model.CreateCalificacionBufeteRequest
-import com.example.bufete.domain.port.CalificacionBufeteServicePort
-import com.example.bufete.domain.port.CalificacionBufeteRepositoryPort
+import com.example.bufete.domain.port.Service.CalificacionBufeteServicePort
+import com.example.bufete.domain.port.Repository.CalificacionBufeteRepositoryPort
 
 class CalificacionBufeteService(
     private val calificacionBufeteRepository: CalificacionBufeteRepositoryPort

@@ -2,10 +2,9 @@ package com.example.bufete.infrastructure.web
 
 import com.example.bufete.domain.model.CreateBufeteRequest
 import com.example.bufete.domain.model.Bufete
-import com.example.bufete.domain.port.BufeteServicePort
+import com.example.bufete.domain.port.Service.BufeteServicePort
 import com.example.shared.security.authorizeRole
 import io.ktor.http.*
-import io.ktor.server.application.*
 import io.ktor.server.auth.*
 import io.ktor.server.auth.jwt.*
 import io.ktor.server.request.*

@@ -2,7 +2,7 @@ package com.example.calificacion.infrastructure.persistence
 
 import com.example.calificacion.domain.model.Calificacion
 import com.example.calificacion.domain.model.CalificacionPromedio
-import com.example.calificacion.domain.port.CalificacionRepositoryPort
+import com.example.calificacion.domain.port.Repository.CalificacionRepositoryPort
 import java.sql.Connection
 import java.sql.ResultSet
 

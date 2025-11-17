@@ -2,9 +2,9 @@ package com.example.reporte.application
 
 import com.example.reporte.domain.model.CreateReporteRequest
 import com.example.reporte.domain.model.Reporte
-import com.example.reporte.domain.port.MotivoReporteRepositoryPort
-import com.example.reporte.domain.port.ReporteRepositoryPort
-import com.example.reporte.domain.port.ReporteServicePort
+import com.example.reporte.domain.port.Repository.MotivoReporteRepositoryPort
+import com.example.reporte.domain.port.Repository.ReporteRepositoryPort
+import com.example.reporte.domain.port.Service.ReporteServicePort
 import com.example.reporte.domain.model.MotivoReporte
 
 

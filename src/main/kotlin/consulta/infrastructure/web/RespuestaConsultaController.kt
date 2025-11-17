@@ -1,10 +1,9 @@
 package com.example.consulta.infrastructure.web
 
 import com.example.consulta.domain.model.CreateRespuestaRequest
-import com.example.consulta.domain.port.RespuestaConsultaServicePort
+import com.example.consulta.domain.port.Service.RespuestaConsultaServicePort
 import com.example.shared.security.authorizeRole
 import io.ktor.http.*
-import io.ktor.server.application.*
 import io.ktor.server.auth.*
 import io.ktor.server.auth.jwt.*
 import io.ktor.server.request.*

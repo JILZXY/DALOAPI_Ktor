@@ -1,7 +1,7 @@
 package com.example.bufete.infrastructure.persistence
 
 import com.example.bufete.domain.model.Bufete
-import com.example.bufete.domain.port.BufeteRepositoryPort
+import com.example.bufete.domain.port.Repository.BufeteRepositoryPort
 import com.example.shared.domain.model.Especialidad
 import java.sql.Connection
 import java.sql.ResultSet

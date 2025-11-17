@@ -3,8 +3,8 @@ package com.example.calificacion.application
 import com.example.calificacion.domain.model.Calificacion
 import com.example.calificacion.domain.model.CalificacionPromedio
 import com.example.calificacion.domain.model.CreateCalificacionRequest
-import com.example.calificacion.domain.port.CalificacionServicePort
-import com.example.calificacion.domain.port.CalificacionRepositoryPort
+import com.example.calificacion.domain.port.Service.CalificacionServicePort
+import com.example.calificacion.domain.port.Repository.CalificacionRepositoryPort
 
 class CalificacionService(
     private val calificacionRepository: CalificacionRepositoryPort

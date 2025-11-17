@@ -2,7 +2,7 @@ package com.example.reporte.infrastructure.persistence
 
 import com.example.reporte.domain.model.MotivoReporte
 import com.example.reporte.domain.model.Reporte
-import com.example.reporte.domain.port.ReporteRepositoryPort
+import com.example.reporte.domain.port.Repository.ReporteRepositoryPort
 import com.example.usuario.domain.model.Usuario
 import java.sql.Connection
 import java.sql.ResultSet

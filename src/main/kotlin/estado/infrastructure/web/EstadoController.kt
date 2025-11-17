@@ -1,6 +1,6 @@
 package com.example.estado.infrastructure.web
 
-import com.example.estado.domain.port.EstadoServicePort
+import com.example.estado.domain.port.Service.EstadoServicePort
 import com.example.shared.config.DatabaseConfig
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.routing.Route

@@ -1,9 +1,8 @@
 package com.example.chat.infrastructure.web
 
 import com.example.chat.domain.model.CreateChatRequest
-import com.example.chat.domain.port.ChatServicePort
+import com.example.chat.domain.port.Service.ChatServicePort
 import io.ktor.http.*
-import io.ktor.server.application.*
 import io.ktor.server.auth.*
 import io.ktor.server.auth.jwt.*
 import io.ktor.server.request.*

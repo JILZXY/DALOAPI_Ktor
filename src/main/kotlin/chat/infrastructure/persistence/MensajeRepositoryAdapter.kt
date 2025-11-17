@@ -1,7 +1,7 @@
 package com.example.chat.infrastructure.persistence
 
 import com.example.chat.domain.model.Mensaje
-import com.example.chat.domain.port.MensajeRepositoryPort
+import com.example.chat.domain.port.Repository.MensajeRepositoryPort
 import com.example.usuario.domain.model.Usuario
 import java.sql.Connection
 import java.sql.ResultSet

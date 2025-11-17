@@ -1,7 +1,7 @@
 package com.example.estado.infrastructure.persistence
 
 import com.example.estado.domain.model.Estado
-import com.example.estado.domain.port.EstadoRepositoryPort
+import com.example.estado.domain.port.Repository.EstadoRepositoryPort
 import java.sql.Connection
 import java.sql.ResultSet
 

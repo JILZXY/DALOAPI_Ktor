@@ -4,10 +4,9 @@ import com.example.municipio.domain.model.Municipio
 import com.example.estado.domain.model.Estado
 import com.example.shared.domain.model.Rol
 import com.example.usuario.domain.model.Usuario
-import com.example.usuario.domain.port.UsuarioRepositoryPort
+import com.example.usuario.domain.port.Repository.UsuarioRepositoryPort
 import java.sql.Connection
 import java.sql.ResultSet
-import java.util.UUID
 
 class UsuarioRepositoryAdapter(
     private val connection: Connection

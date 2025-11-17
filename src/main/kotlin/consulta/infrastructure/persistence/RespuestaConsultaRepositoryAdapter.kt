@@ -1,7 +1,7 @@
 package com.example.consulta.infrastructure.persistence
 
 import com.example.consulta.domain.model.RespuestaConsulta
-import com.example.consulta.domain.port.RespuestaConsultaRepositoryPort
+import com.example.consulta.domain.port.Repository.RespuestaConsultaRepositoryPort
 import com.example.usuario.domain.model.Abogado
 import com.example.usuario.domain.model.Usuario
 import java.sql.Connection

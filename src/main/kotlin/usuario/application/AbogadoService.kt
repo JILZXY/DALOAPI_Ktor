@@ -1,8 +1,8 @@
 package com.example.usuario.application
 
 import com.example.usuario.domain.model.Abogado
-import com.example.usuario.domain.port.AbogadoServicePort
-import com.example.usuario.domain.port.AbogadoRepositoryPort
+import com.example.usuario.domain.port.Service.AbogadoServicePort
+import com.example.usuario.domain.port.Repository.AbogadoRepositoryPort
 
 class AbogadoService(
     private val abogadoRepository: AbogadoRepositoryPort

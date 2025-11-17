@@ -1,9 +1,8 @@
 package com.example.usuario.infrastructure.web
 
 import com.example.usuario.domain.model.Abogado
-import com.example.usuario.domain.port.AbogadoServicePort
+import com.example.usuario.domain.port.Service.AbogadoServicePort
 import io.ktor.http.*
-import io.ktor.server.application.*
 import io.ktor.server.auth.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*

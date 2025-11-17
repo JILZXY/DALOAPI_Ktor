@@ -1,7 +1,7 @@
 package com.example.municipio.application
 
-import com.example.municipio.domain.port.MunicipioRepositoryPort
-import com.example.municipio.domain.port.MunicipioServicePort
+import com.example.municipio.domain.port.Repository.MunicipioRepositoryPort
+import com.example.municipio.domain.port.Service.MunicipioServicePort
 import com.example.municipio.domain.model.Municipio
 
 class MunicipioService(

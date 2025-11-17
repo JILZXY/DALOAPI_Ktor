@@ -1,7 +1,7 @@
 package com.example.bufete.infrastructure.web
 
 import com.example.bufete.domain.model.CreateCalificacionBufeteRequest
-import com.example.bufete.domain.port.CalificacionBufeteServicePort
+import com.example.bufete.domain.port.Service.CalificacionBufeteServicePort
 import com.example.shared.security.authorizeRole
 import io.ktor.http.*
 import io.ktor.server.auth.*

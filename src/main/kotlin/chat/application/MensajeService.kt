@@ -1,8 +1,8 @@
 package com.example.chat.application
 
 import com.example.chat.domain.model.Mensaje
-import com.example.chat.domain.port.MensajeRepositoryPort
-import com.example.chat.domain.port.MensajeServicePort
+import com.example.chat.domain.port.Repository.MensajeRepositoryPort
+import com.example.chat.domain.port.Service.MensajeServicePort
 
 class MensajeService(
     private val mensajeRepository: MensajeRepositoryPort

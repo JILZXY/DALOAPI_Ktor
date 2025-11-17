@@ -3,7 +3,7 @@ package com.example.usuario.infrastructure.web
 import com.example.usuario.domain.model.LoginRequest
 import com.example.usuario.domain.model.RegisterRequest
 import com.example.usuario.domain.model.Usuario
-import com.example.usuario.domain.port.UsuarioServicePort
+import com.example.usuario.domain.port.Service.UsuarioServicePort
 import io.ktor.http.*
 import io.ktor.server.auth.*
 import io.ktor.server.auth.jwt.*

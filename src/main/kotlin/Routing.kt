@@ -47,5 +47,35 @@ fun Application.configureRouting() {
         with(DependencyInjection.respuestaConsultaController) {
             respuestaConsultaRoutes()
         }
+
+        // ===== BUFETE ROUTES =====
+        with(DependencyInjection.bufeteController) {
+            bufeteRoutes()
+        }
+
+        // ===== SOLICITUD BUFETE ROUTES =====
+        with(DependencyInjection.solicitudBufeteController) {
+            solicitudBufeteRoutes()
+        }
+
+        // ===== CALIFICACION BUFETE ROUTES =====
+        with(DependencyInjection.calificacionBufeteController) {
+            calificacionBufeteRoutes()
+        }
+
+        // ===== CHAT ROUTES =====
+        with(DependencyInjection.chatController) {
+            chatRoutes()
+        }
+
+        // ===== MENSAJE ROUTES =====
+        with(DependencyInjection.mensajeController) {
+            mensajeRoutes()
+        }
+
+        // ===== REPORTE ROUTES =====
+        with(DependencyInjection.reporteController) {
+            reporteRoutes()
+        }
     }
 }

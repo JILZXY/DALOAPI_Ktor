@@ -2,8 +2,8 @@ package com.example.consulta.application
 
 import com.example.consulta.domain.model.CreateRespuestaRequest
 import com.example.consulta.domain.model.RespuestaConsulta
-import com.example.consulta.domain.port.RespuestaConsultaRepositoryPort
-import com.example.consulta.domain.port.RespuestaConsultaServicePort
+import com.example.consulta.domain.port.Repository.RespuestaConsultaRepositoryPort
+import com.example.consulta.domain.port.Service.RespuestaConsultaServicePort
 
 class RespuestaConsultaService(
     private val respuestaRepository: RespuestaConsultaRepositoryPort

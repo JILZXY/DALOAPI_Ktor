@@ -2,7 +2,7 @@ package com.example.municipio.infrastructure.persistence
 
 import com.example.estado.domain.model.Estado
 import com.example.municipio.domain.model.Municipio
-import com.example.municipio.domain.port.MunicipioRepositoryPort
+import com.example.municipio.domain.port.Repository.MunicipioRepositoryPort
 import java.sql.Connection
 import java.sql.ResultSet
 

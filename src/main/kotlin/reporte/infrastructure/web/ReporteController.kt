@@ -1,7 +1,7 @@
 package com.example.reporte.infrastructure.web
 
 import com.example.reporte.domain.model.CreateReporteRequest
-import com.example.reporte.domain.port.ReporteServicePort
+import com.example.reporte.domain.port.Service.ReporteServicePort
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.auth.*

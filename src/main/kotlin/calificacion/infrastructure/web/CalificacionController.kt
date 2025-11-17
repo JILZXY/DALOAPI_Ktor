@@ -1,7 +1,7 @@
 package com.example.calificacion.infrastructure.web
 
 import com.example.calificacion.domain.model.CreateCalificacionRequest
-import com.example.calificacion.domain.port.CalificacionServicePort
+import com.example.calificacion.domain.port.Service.CalificacionServicePort
 import com.example.shared.security.authorizeRole
 import io.ktor.http.*
 import io.ktor.server.auth.*

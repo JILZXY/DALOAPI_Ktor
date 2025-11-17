@@ -1,6 +1,6 @@
 package com.example.municipio.infrastructure.web
 
-import com.example.municipio.domain.port.MunicipioServicePort
+import com.example.municipio.domain.port.Service.MunicipioServicePort
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.response.*

@@ -1,7 +1,7 @@
 package com.example.chat.application
 
-import com.example.chat.domain.port.ChatRepositoryPort
-import com.example.chat.domain.port.ChatServicePort
+import com.example.chat.domain.port.Repository.ChatRepositoryPort
+import com.example.chat.domain.port.Service.ChatServicePort
 import com.example.chat.domain.model.Chat
 
 class ChatService(

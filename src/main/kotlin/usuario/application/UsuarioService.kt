@@ -2,8 +2,8 @@ package com.example.usuario.application
 
 import com.example.shared.security.JwtConfig
 import com.example.shared.security.PasswordHasher
-import com.example.usuario.domain.port.UsuarioRepositoryPort
-import com.example.usuario.domain.port.UsuarioServicePort
+import com.example.usuario.domain.port.Repository.UsuarioRepositoryPort
+import com.example.usuario.domain.port.Service.UsuarioServicePort
 import com.example.usuario.domain.model.*
 
 class UsuarioService(

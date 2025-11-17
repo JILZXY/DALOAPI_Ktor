@@ -1,7 +1,7 @@
 package com.example.estado.application
 
-import com.example.estado.domain.port.EstadoRepositoryPort
-import com.example.estado.domain.port.EstadoServicePort
+import com.example.estado.domain.port.Repository.EstadoRepositoryPort
+import com.example.estado.domain.port.Service.EstadoServicePort
 import com.example.estado.domain.model.Estado
 
 class EstadoService(

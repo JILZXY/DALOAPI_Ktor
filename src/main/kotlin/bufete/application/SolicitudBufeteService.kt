@@ -1,10 +1,10 @@
 package com.example.bufete.application
 
 import com.example.bufete.domain.model.SolicitudBufete
-import com.example.bufete.domain.port.SolicitudBufeteServicePort
-import com.example.bufete.domain.port.SolicitudBufeteRepositoryPort
-import com.example.bufete.domain.port.BufeteRepositoryPort
-import com.example.calificacion.domain.port.CalificacionRepositoryPort
+import com.example.bufete.domain.port.Service.SolicitudBufeteServicePort
+import com.example.bufete.domain.port.Repository.SolicitudBufeteRepositoryPort
+import com.example.bufete.domain.port.Repository.BufeteRepositoryPort
+import com.example.calificacion.domain.port.Repository.CalificacionRepositoryPort
 
 class SolicitudBufeteService(
     private val solicitudRepository: SolicitudBufeteRepositoryPort,

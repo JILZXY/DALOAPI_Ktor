@@ -2,8 +2,8 @@ package com.example.bufete.application
 
 import com.example.bufete.domain.model.Bufete
 import com.example.bufete.domain.model.CreateBufeteRequest
-import com.example.bufete.domain.port.BufeteServicePort
-import com.example.bufete.domain.port.BufeteRepositoryPort
+import com.example.bufete.domain.port.Service.BufeteServicePort
+import com.example.bufete.domain.port.Repository.BufeteRepositoryPort
 
 class BufeteService(
     private val bufeteRepository: BufeteRepositoryPort

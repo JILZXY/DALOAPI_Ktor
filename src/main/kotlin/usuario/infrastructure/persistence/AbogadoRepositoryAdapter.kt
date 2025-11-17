@@ -1,7 +1,7 @@
 package com.example.usuario.infrastructure.persistence
 
 import com.example.shared.domain.model.Especialidad
-import com.example.usuario.domain.port.AbogadoRepositoryPort
+import com.example.usuario.domain.port.Repository.AbogadoRepositoryPort
 import com.example.usuario.domain.model.*
 import java.sql.Connection
 import java.sql.ResultSet
