@@ -1,5 +1,6 @@
 package com.example.usuario.domain.port.Repository
 
+import com.example.shared.domain.model.Especialidad
 import com.example.usuario.domain.model.Abogado
 
 interface AbogadoRepositoryPort {
@@ -8,4 +9,13 @@ interface AbogadoRepositoryPort {
     suspend fun findByEspecialidad(especialidadId: Int): List<Abogado>
     suspend fun create(abogado: Abogado): Abogado?
     suspend fun update(abogado: Abogado): Abogado?
+    suspend fun findActivosByNombre(nombre: String): List<Abogado>
+    suspend fun findActivosByLocalidad(estadoId: Int?, municipioId: Int?): List<Abogado>
+    suspend fun findActivosConFiltros(
+        materiaId: Int?,
+        estadoId: Int?,
+        municipioId: Int?,
+        ordenarPorCalificacion: Boolean
+    ): List<Abogado>
+    suspend fun getEspecialidadesByAbogadoId(abogadoId: String): List<Especialidad>
 }
