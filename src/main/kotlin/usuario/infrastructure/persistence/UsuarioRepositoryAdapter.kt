@@ -210,4 +210,46 @@ class UsuarioRepositoryAdapter(
             )
         )
     }
+
+    override suspend fun findInactivos(): List<Usuario> {
+        val usuarios = mutableListOf<Usuario>()
+        val statement = connection.prepareStatement(
+            """
+            SELECT 
+                u.id_usuario, u.nombre, u.email, u.fecha_registro,
+                u.municipio_id, u.rol_id, u.activo,
+                r.nombre as rol_nombre,
+                m.nombre as municipio_nombre,
+                e.id as estado_id, e.nombre as estado_nombre
+            FROM Usuarios u
+            LEFT JOIN Roles r ON u.rol_id = r.id
+            LEFT JOIN Municipios m ON u.municipio_id = m.id
+            LEFT JOIN Estados e ON m.estado_id = e.id
+            WHERE u.activo = false
+            ORDER BY u.fecha_registro DESC
+            """
+        )
+
+        val resultSet = statement.executeQuery()
+        while (resultSet.next()) {
+            usuarios.add(resultSet.toUsuario())
+        }
+
+        resultSet.close()
+        statement.close()
+
+        return usuarios
+    }
+
+    override suspend fun activar(id: String): Boolean {
+        val statement = connection.prepareStatement(
+            "UPDATE Usuarios SET activo = true WHERE id_usuario = ?::uuid"
+        )
+        statement.setString(1, id)
+
+        val rowsAffected = statement.executeUpdate()
+        statement.close()
+
+        return rowsAffected > 0
+    }
 }

@@ -52,7 +52,6 @@ class UsuarioService(
         val usuario = usuarioRepository.findByEmail(request.email) ?: return null
 
         // Verificar contraseña (necesitarás obtener el hash de BD)
-        // if (!passwordHasher.verify(request.contrasena, storedHash)) return null
         if (!usuario.activo) return null
 
         // Generar token
