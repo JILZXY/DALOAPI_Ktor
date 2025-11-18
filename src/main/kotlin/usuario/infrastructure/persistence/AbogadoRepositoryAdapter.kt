@@ -164,6 +164,143 @@ class AbogadoRepositoryAdapter(
         return especialidades
     }
 
+    override suspend fun findActivosByNombre(nombre: String): List<Abogado> {
+        val abogados = mutableListOf<Abogado>()
+        val statement = connection.prepareStatement(
+            """
+            SELECT DISTINCT
+                a.id_usuario, a.cedula_profesional, a.biografia, a.calificacion_promedio,
+                u.nombre, u.email, u.fecha_registro, u.municipio_id, u.rol_id, u.activo
+            FROM Abogados a
+            INNER JOIN Usuarios u ON a.id_usuario = u.id_usuario
+            WHERE u.activo = true AND LOWER(u.nombre) LIKE LOWER(?)
+            ORDER BY a.calificacion_promedio DESC
+            """
+        )
+        statement.setString(1, "%$nombre%")
+
+        val resultSet = statement.executeQuery()
+        while (resultSet.next()) {
+            val abogado = resultSet.toAbogado()
+            abogados.add(abogado.copy(
+                especialidades = getEspecialidadesByAbogado(abogado.idUsuario)
+            ))
+        }
+
+        resultSet.close()
+        statement.close()
+
+        return abogados
+    }
+
+    override suspend fun findActivosByLocalidad(estadoId: Int?, municipioId: Int?): List<Abogado> {
+        val abogados = mutableListOf<Abogado>()
+
+        val whereClause = when {
+            municipioId != null -> "u.municipio_id = ?"
+            estadoId != null -> "m.estado_id = ?"
+            else -> "1=1" // Si no hay filtros, devuelve todos
+        }
+
+        val statement = connection.prepareStatement(
+            """
+            SELECT DISTINCT
+                a.id_usuario, a.cedula_profesional, a.biografia, a.calificacion_promedio,
+                u.nombre, u.email, u.fecha_registro, u.municipio_id, u.rol_id, u.activo
+            FROM Abogados a
+            INNER JOIN Usuarios u ON a.id_usuario = u.id_usuario
+            LEFT JOIN Municipios m ON u.municipio_id = m.id
+            WHERE u.activo = true AND $whereClause
+            ORDER BY a.calificacion_promedio DESC
+            """
+        )
+
+        when {
+            municipioId != null -> statement.setInt(1, municipioId)
+            estadoId != null -> statement.setInt(1, estadoId)
+        }
+
+        val resultSet = statement.executeQuery()
+        while (resultSet.next()) {
+            val abogado = resultSet.toAbogado()
+            abogados.add(abogado.copy(
+                especialidades = getEspecialidadesByAbogado(abogado.idUsuario)
+            ))
+        }
+
+        resultSet.close()
+        statement.close()
+
+        return abogados
+    }
+
+    override suspend fun findActivosConFiltros(
+        materiaId: Int?,
+        estadoId: Int?,
+        municipioId: Int?,
+        ordenarPorCalificacion: Boolean
+    ): List<Abogado> {
+        val abogados = mutableListOf<Abogado>()
+
+        val whereClauses = mutableListOf("u.activo = true")
+
+        if (materiaId != null) {
+            whereClauses.add("ae.id_catalogo_especialidad = ?")
+        }
+        if (municipioId != null) {
+            whereClauses.add("u.municipio_id = ?")
+        } else if (estadoId != null) {
+            whereClauses.add("m.estado_id = ?")
+        }
+
+        val orderBy = if (ordenarPorCalificacion) {
+            "ORDER BY a.calificacion_promedio DESC"
+        } else {
+            "ORDER BY u.nombre"
+        }
+
+        val sql = """
+            SELECT DISTINCT
+                a.id_usuario, a.cedula_profesional, a.biografia, a.calificacion_promedio,
+                u.nombre, u.email, u.fecha_registro, u.municipio_id, u.rol_id, u.activo
+            FROM Abogados a
+            INNER JOIN Usuarios u ON a.id_usuario = u.id_usuario
+            LEFT JOIN Municipios m ON u.municipio_id = m.id
+            ${if (materiaId != null) "INNER JOIN Abogado_Especialidad ae ON a.id_usuario = ae.id_abogado" else ""}
+            WHERE ${whereClauses.joinToString(" AND ")}
+            $orderBy
+        """
+
+        val statement = connection.prepareStatement(sql)
+
+        var paramIndex = 1
+        if (materiaId != null) {
+            statement.setInt(paramIndex++, materiaId)
+        }
+        if (municipioId != null) {
+            statement.setInt(paramIndex++, municipioId)
+        } else if (estadoId != null) {
+            statement.setInt(paramIndex++, estadoId)
+        }
+
+        val resultSet = statement.executeQuery()
+        while (resultSet.next()) {
+            val abogado = resultSet.toAbogado()
+            abogados.add(abogado.copy(
+                especialidades = getEspecialidadesByAbogado(abogado.idUsuario)
+            ))
+        }
+
+        resultSet.close()
+        statement.close()
+
+        return abogados
+    }
+
+    override suspend fun getEspecialidadesByAbogadoId(abogadoId: String): List<Especialidad> {
+        return getEspecialidadesByAbogado(abogadoId)
+    }
+
     private fun ResultSet.toAbogado(): Abogado {
         return Abogado(
             idUsuario = getString("id_usuario"),
