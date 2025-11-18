@@ -1,5 +1,6 @@
 package com.example.usuario.infrastructure.web
 
+import com.example.shared.security.authorizeRole
 import com.example.usuario.domain.model.LoginRequest
 import com.example.usuario.domain.model.RegisterRequest
 import com.example.usuario.domain.model.Usuario
@@ -17,6 +18,50 @@ class UsuarioController(
 
     fun Route.usuarioRoutes() {
         route("/api/auth") {
+            authenticate("auth-jwt") {
+                authorizeRole(3) {
+                    get("/inactivos") {
+                        val usuariosInactivos = usuarioService.getUsuariosInactivos()
+                        call.respond(HttpStatusCode.OK, usuariosInactivos)
+                    }
+
+                    // Activar un usuario (principalmente para aprobar abogados)
+                    patch("/{id}/activar") {
+                        val id = call.parameters["id"]
+
+                        if (id == null) {
+                            call.respond(HttpStatusCode.BadRequest, mapOf("error" to "ID inválido"))
+                            return@patch
+                        }
+
+                        val activado = usuarioService.activarUsuario(id)
+
+                        if (activado) {
+                            call.respond(HttpStatusCode.OK, mapOf("message" to "Usuario activado"))
+                        } else {
+                            call.respond(HttpStatusCode.NotFound, mapOf("error" to "Usuario no encontrado"))
+                        }
+                    }
+                }
+
+                // Buscar por email (cualquier usuario autenticado)
+                get("/email/{email}") {
+                    val email = call.parameters["email"]
+
+                    if (email == null) {
+                        call.respond(HttpStatusCode.BadRequest, mapOf("error" to "Email inválido"))
+                        return@get
+                    }
+
+                    val usuario = usuarioService.getUsuarioByEmail(email)
+
+                    if (usuario != null) {
+                        call.respond(HttpStatusCode.OK, usuario)
+                    } else {
+                        call.respond(HttpStatusCode.NotFound, mapOf("error" to "Usuario no encontrado"))
+                    }
+                }
+            }
             post("/register") {
                 val request = call.receive<RegisterRequest>()
 
