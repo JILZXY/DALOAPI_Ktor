@@ -68,4 +68,16 @@ class UsuarioService(
     override suspend fun deleteUsuario(id: String): Boolean {
         return usuarioRepository.delete(id)
     }
+
+    override suspend fun getUsuariosInactivos(): List<Usuario> {
+        return usuarioRepository.findInactivos()
+    }
+
+    override suspend fun activarUsuario(id: String): Boolean {
+        return usuarioRepository.activar(id)
+    }
+
+    override suspend fun getUsuarioByEmail(email: String): Usuario? {
+        return usuarioRepository.findByEmail(email)
+    }
 }
