@@ -12,4 +12,7 @@ interface UsuarioServicePort {
     suspend fun login(request: LoginRequest): AuthResponse?
     suspend fun updateUsuario(id: String, usuario: Usuario): Usuario?
     suspend fun deleteUsuario(id: String): Boolean
+    suspend fun getUsuariosInactivos(): List<Usuario>
+    suspend fun activarUsuario(id: String): Boolean
+    suspend fun getUsuarioByEmail(email: String): Usuario?
 }
