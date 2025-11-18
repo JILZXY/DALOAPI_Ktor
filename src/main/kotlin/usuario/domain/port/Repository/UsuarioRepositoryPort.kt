@@ -9,4 +9,6 @@ interface UsuarioRepositoryPort {
     suspend fun create(usuario: Usuario, passwordHash: String): Usuario?
     suspend fun update(usuario: Usuario): Usuario?
     suspend fun delete(id: String): Boolean
+    suspend fun findInactivos(): List<Usuario>
+    suspend fun activar(id: String): Boolean
 }
