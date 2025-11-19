@@ -11,4 +11,12 @@ interface ConsultaServicePort {
     suspend fun createConsulta(usuarioId: String, request: CreateConsultaRequest): Consulta?
     suspend fun updateEstadoConsulta(id: Int, estado: String): Boolean
     suspend fun deleteConsulta(id: Int): Boolean
+    suspend fun getConsultasByMateria(materiaId: Int): List<Consulta>
+    suspend fun getConsultasByLocalidad(estadoId: Int?, municipioId: Int?): List<Consulta>
+    suspend fun getConsultasByMateriaYLocalidad(
+        materiaId: Int,
+        estadoId: Int?,
+        municipioId: Int?
+    ): List<Consulta>
+    suspend fun getTotalConsultasByUsuarioId(usuarioId: String): Int
 }
