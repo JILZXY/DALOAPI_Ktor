@@ -121,6 +121,59 @@ class RespuestaConsultaRepositoryAdapter(
         return rowsAffected > 0
     }
 
+    override suspend fun countByAbogadoId(abogadoId: String): Int {
+        val statement = connection.prepareStatement(
+            """
+            SELECT COUNT(*) as total
+            FROM Respuesta_Consulta
+            WHERE id_abogado = ?::uuid
+            """
+        )
+        statement.setString(1, abogadoId)
+
+        val resultSet = statement.executeQuery()
+        val total = if (resultSet.next()) {
+            resultSet.getInt("total")
+        } else {
+            0
+        }
+
+        resultSet.close()
+        statement.close()
+
+        return total
+    }
+
+    override suspend fun findByAbogadoId(abogadoId: String): List<RespuestaConsulta> {
+        val respuestas = mutableListOf<RespuestaConsulta>()
+        val statement = connection.prepareStatement(
+            """
+            SELECT rc.id_respuesta, rc.id_consulta, rc.id_abogado, rc.respuesta,
+                   rc.fecha_respuesta, rc.likes,
+                   u.nombre as abogado_nombre, u.email as abogado_email,
+                   a.cedula_profesional, a.biografia, a.calificacion_promedio,
+                   c.titulo as consulta_titulo, c.pregunta as consulta_pregunta
+            FROM Respuesta_Consulta rc
+            INNER JOIN Abogados a ON rc.id_abogado = a.id_usuario
+            INNER JOIN Usuarios u ON a.id_usuario = u.id_usuario
+            INNER JOIN Consultas c ON rc.id_consulta = c.id_consulta
+            WHERE rc.id_abogado = ?::uuid
+            ORDER BY rc.fecha_respuesta DESC
+            """
+        )
+        statement.setString(1, abogadoId)
+
+        val resultSet = statement.executeQuery()
+        while (resultSet.next()) {
+            respuestas.add(resultSet.toRespuestaConsulta())
+        }
+
+        resultSet.close()
+        statement.close()
+
+        return respuestas
+    }
+
     private fun ResultSet.toRespuestaConsulta(): RespuestaConsulta {
         return RespuestaConsulta(
             idRespuesta = getInt("id_respuesta"),
