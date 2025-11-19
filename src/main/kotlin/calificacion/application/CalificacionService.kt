@@ -3,6 +3,7 @@ package com.example.calificacion.application
 import com.example.calificacion.domain.model.Calificacion
 import com.example.calificacion.domain.model.CalificacionPromedio
 import com.example.calificacion.domain.model.CreateCalificacionRequest
+import com.example.calificacion.domain.model.PromediosRespuesta
 import com.example.calificacion.domain.port.Service.CalificacionServicePort
 import com.example.calificacion.domain.port.Repository.CalificacionRepositoryPort
 
@@ -20,6 +21,15 @@ class CalificacionService(
 
     override suspend fun getPromediosByAbogado(abogadoId: String): CalificacionPromedio {
         return calificacionRepository.getPromediosByAbogado(abogadoId)
+    }
+
+    override suspend fun getPromedioGeneralAbogado(abogadoId: String): Double {
+        val promedios = calificacionRepository.getPromediosByAbogado(abogadoId)
+        return promedios.promedioGeneral
+    }
+
+    override suspend fun getPromediosPorRespuesta(respuestaId: Int): PromediosRespuesta {
+        return calificacionRepository.getPromediosByRespuestaId(respuestaId)
     }
 
     override suspend fun createCalificacion(
