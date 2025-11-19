@@ -9,4 +9,5 @@ interface ChatRepositoryPort {
     suspend fun findByParticipantes(clienteId: String, abogadoId: String): Chat?
     suspend fun create(chat: Chat): Chat?
     suspend fun delete(id: Int): Boolean
+    suspend fun findByUsuarioIdAndNombreParticipante(usuarioId: String, nombre: String): List<Chat>
 }

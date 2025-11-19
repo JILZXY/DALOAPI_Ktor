@@ -8,4 +8,5 @@ interface ChatServicePort {
     suspend fun getChatsByUsuarioId(usuarioId: String): List<Chat>
     suspend fun createChat(clienteId: String, abogadoId: String): Chat?
     suspend fun deleteChat(id: Int): Boolean
+    suspend fun buscarChatsPorNombreParticipante(usuarioId: String, nombre: String): List<Chat>
 }

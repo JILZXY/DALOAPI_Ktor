@@ -35,6 +35,10 @@ class ChatService(
         return chatRepository.create(chat)
     }
 
+    override suspend fun buscarChatsPorNombreParticipante(usuarioId: String, nombre: String): List<Chat> {
+        return chatRepository.findByUsuarioIdAndNombreParticipante(usuarioId, nombre)
+    }
+
     override suspend fun deleteChat(id: Int): Boolean {
         return chatRepository.delete(id)
     }
