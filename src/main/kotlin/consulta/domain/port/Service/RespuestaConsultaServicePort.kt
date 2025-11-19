@@ -9,4 +9,6 @@ interface RespuestaConsultaServicePort {
     suspend fun createRespuesta(consultaId: Int, abogadoId: String, request: CreateRespuestaRequest): RespuestaConsulta?
     suspend fun addLike(id: Int): Boolean
     suspend fun deleteRespuesta(id: Int): Boolean
+    suspend fun getTotalRespuestasByAbogadoId(abogadoId: String): Int
+    suspend fun getRespuestasByAbogadoId(abogadoId: String): List<RespuestaConsulta>
 }
