@@ -60,6 +60,32 @@ class CalificacionController(
                 }
             }
 
+            // Obtener calificación promedio general de un abogado
+            get("/promedio/{id}") {
+                val id = call.parameters["id"]
+
+                if (id == null) {
+                    call.respond(HttpStatusCode.BadRequest, mapOf("error" to "ID inválido"))
+                    return@get
+                }
+
+                val promedioGeneral = calificacionService.getPromedioGeneralAbogado(id)
+                call.respond(HttpStatusCode.OK, mapOf("promedioGeneral" to promedioGeneral))
+            }
+
+            // Obtener promedios detallados por criterio de una respuesta específica
+            get("/promedios/respuesta/{id}") {
+                val id = call.parameters["id"]?.toIntOrNull()
+
+                if (id == null) {
+                    call.respond(HttpStatusCode.BadRequest, mapOf("error" to "ID inválido"))
+                    return@get
+                }
+
+                val promedios = calificacionService.getPromediosPorRespuesta(id)
+                call.respond(HttpStatusCode.OK, promedios)
+            }
+
             // Protegidas - Solo clientes pueden calificar abogados
             authenticate("auth-jwt") {
                 authorizeRole(1) {
