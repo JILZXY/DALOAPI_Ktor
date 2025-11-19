@@ -38,4 +38,12 @@ class RespuestaConsultaService(
     override suspend fun deleteRespuesta(id: Int): Boolean {
         return respuestaRepository.delete(id)
     }
+
+    override suspend fun getTotalRespuestasByAbogadoId(abogadoId: String): Int {
+        return respuestaRepository.countByAbogadoId(abogadoId)
+    }
+
+    override suspend fun getRespuestasByAbogadoId(abogadoId: String): List<RespuestaConsulta> {
+        return respuestaRepository.findByAbogadoId(abogadoId)
+    }
 }
