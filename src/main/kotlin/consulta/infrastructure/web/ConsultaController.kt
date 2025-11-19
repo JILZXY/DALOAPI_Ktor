@@ -54,6 +54,88 @@ class ConsultaController(
                 }
             }
 
+            // Filtrar consultas públicas por materia
+            get("/materia") {
+                val materiaId = call.request.queryParameters["materiaId"]?.toIntOrNull()
+
+                if (materiaId == null) {
+                    call.respond(HttpStatusCode.BadRequest, mapOf("error" to "materiaId requerido"))
+                    return@get
+                }
+
+                val consultas = consultaService.getConsultasByMateria(materiaId)
+                call.respond(HttpStatusCode.OK, consultas)
+            }
+
+            // Filtrar consultas públicas por localidad del autor
+            get("/localidad") {
+                val estadoId = call.request.queryParameters["estadoId"]?.toIntOrNull()
+                val municipioId = call.request.queryParameters["municipioId"]?.toIntOrNull()
+
+                if (estadoId == null && municipioId == null) {
+                    call.respond(
+                        HttpStatusCode.BadRequest,
+                        mapOf("error" to "Debe proporcionar estadoId o municipioId")
+                    )
+                    return@get
+                }
+
+                val consultas = consultaService.getConsultasByLocalidad(estadoId, municipioId)
+                call.respond(HttpStatusCode.OK, consultas)
+            }
+
+            // Filtrar consultas públicas por materia Y localidad
+            get("/materiaLocalidad") {
+                val materiaId = call.request.queryParameters["materiaId"]?.toIntOrNull()
+                val estadoId = call.request.queryParameters["estadoId"]?.toIntOrNull()
+                val municipioId = call.request.queryParameters["municipioId"]?.toIntOrNull()
+
+                if (materiaId == null) {
+                    call.respond(HttpStatusCode.BadRequest, mapOf("error" to "materiaId requerido"))
+                    return@get
+                }
+
+                if (estadoId == null && municipioId == null) {
+                    call.respond(
+                        HttpStatusCode.BadRequest,
+                        mapOf("error" to "Debe proporcionar estadoId o municipioId")
+                    )
+                    return@get
+                }
+
+                val consultas = consultaService.getConsultasByMateriaYLocalidad(
+                    materiaId, estadoId, municipioId
+                )
+                call.respond(HttpStatusCode.OK, consultas)
+            }
+
+            // Contar total de consultas de un usuario
+            get("/usuario/{id}/total") {
+                val id = call.parameters["id"]
+
+                if (id == null) {
+                    call.respond(HttpStatusCode.BadRequest, mapOf("error" to "ID inválido"))
+                    return@get
+                }
+
+                val total = consultaService.getTotalConsultasByUsuarioId(id)
+                call.respond(HttpStatusCode.OK, mapOf("total" to total))
+            }
+
+            // Obtener todas las consultas de un usuario (ya existe como /mis-consultas pero solo para el autenticado)
+            // Este endpoint permite ver consultas de cualquier usuario por ID
+            get("/por-id/{id}") {
+                val id = call.parameters["id"]
+
+                if (id == null) {
+                    call.respond(HttpStatusCode.BadRequest, mapOf("error" to "ID inválido"))
+                    return@get
+                }
+
+                val consultas = consultaService.getConsultasByUsuarioId(id)
+                call.respond(HttpStatusCode.OK, consultas)
+            }
+
             // Rutas protegidas - Autenticado
             authenticate("auth-jwt") {
 
