@@ -245,6 +245,153 @@ class ConsultaRepositoryAdapter(
         return especialidades
     }
 
+    override suspend fun findByMateria(materiaId: Int): List<Consulta> {
+        val consultas = mutableListOf<Consulta>()
+        val statement = connection.prepareStatement(
+            """
+            SELECT DISTINCT 
+                c.id_consulta, c.id_usuario, c.titulo, c.pregunta, 
+                c.fecha_publicacion, c.es_privada, c.estado,
+                u.nombre as usuario_nombre, u.email as usuario_email
+            FROM Consultas c
+            INNER JOIN Usuarios u ON c.id_usuario = u.id_usuario
+            INNER JOIN Consulta_Especialidad ce ON c.id_consulta = ce.id_consulta
+            WHERE c.es_privada = false AND ce.id_catalogo_especialidad = ?
+            ORDER BY c.fecha_publicacion DESC
+            """
+        )
+        statement.setInt(1, materiaId)
+
+        val resultSet = statement.executeQuery()
+        while (resultSet.next()) {
+            val consulta = resultSet.toConsulta()
+            consultas.add(consulta.copy(
+                especialidades = getEspecialidadesByConsulta(consulta.idConsulta)
+            ))
+        }
+
+        resultSet.close()
+        statement.close()
+
+        return consultas
+    }
+
+    override suspend fun findByLocalidad(estadoId: Int?, municipioId: Int?): List<Consulta> {
+        val consultas = mutableListOf<Consulta>()
+
+        val whereClause = when {
+            municipioId != null -> "u.municipio_id = ?"
+            estadoId != null -> "m.estado_id = ?"
+            else -> "1=1"
+        }
+
+        val statement = connection.prepareStatement(
+            """
+            SELECT DISTINCT
+                c.id_consulta, c.id_usuario, c.titulo, c.pregunta, 
+                c.fecha_publicacion, c.es_privada, c.estado,
+                u.nombre as usuario_nombre, u.email as usuario_email
+            FROM Consultas c
+            INNER JOIN Usuarios u ON c.id_usuario = u.id_usuario
+            LEFT JOIN Municipios m ON u.municipio_id = m.id
+            WHERE c.es_privada = false AND $whereClause
+            ORDER BY c.fecha_publicacion DESC
+            """
+        )
+
+        when {
+            municipioId != null -> statement.setInt(1, municipioId)
+            estadoId != null -> statement.setInt(1, estadoId)
+        }
+
+        val resultSet = statement.executeQuery()
+        while (resultSet.next()) {
+            val consulta = resultSet.toConsulta()
+            consultas.add(consulta.copy(
+                especialidades = getEspecialidadesByConsulta(consulta.idConsulta)
+            ))
+        }
+
+        resultSet.close()
+        statement.close()
+
+        return consultas
+    }
+
+    override suspend fun findByMateriaYLocalidad(
+        materiaId: Int,
+        estadoId: Int?,
+        municipioId: Int?
+    ): List<Consulta> {
+        val consultas = mutableListOf<Consulta>()
+
+        val localidadClause = when {
+            municipioId != null -> "u.municipio_id = ?"
+            estadoId != null -> "m.estado_id = ?"
+            else -> "1=1"
+        }
+
+        val statement = connection.prepareStatement(
+            """
+            SELECT DISTINCT
+                c.id_consulta, c.id_usuario, c.titulo, c.pregunta, 
+                c.fecha_publicacion, c.es_privada, c.estado,
+                u.nombre as usuario_nombre, u.email as usuario_email
+            FROM Consultas c
+            INNER JOIN Usuarios u ON c.id_usuario = u.id_usuario
+            LEFT JOIN Municipios m ON u.municipio_id = m.id
+            INNER JOIN Consulta_Especialidad ce ON c.id_consulta = ce.id_consulta
+            WHERE c.es_privada = false 
+                AND ce.id_catalogo_especialidad = ?
+                AND $localidadClause
+            ORDER BY c.fecha_publicacion DESC
+            """
+        )
+
+        statement.setInt(1, materiaId)
+
+        when {
+            municipioId != null -> statement.setInt(2, municipioId)
+            estadoId != null -> statement.setInt(2, estadoId)
+        }
+
+        val resultSet = statement.executeQuery()
+        while (resultSet.next()) {
+            val consulta = resultSet.toConsulta()
+            consultas.add(consulta.copy(
+                especialidades = getEspecialidadesByConsulta(consulta.idConsulta)
+            ))
+        }
+
+        resultSet.close()
+        statement.close()
+
+        return consultas
+    }
+
+    override suspend fun countByUsuarioId(usuarioId: String): Int {
+        val statement = connection.prepareStatement(
+            """
+            SELECT COUNT(*) as total
+            FROM Consultas
+            WHERE id_usuario = ?::uuid
+            """
+        )
+        statement.setString(1, usuarioId)
+
+        val resultSet = statement.executeQuery()
+        val total = if (resultSet.next()) {
+            resultSet.getInt("total")
+        } else {
+            0
+        }
+
+        resultSet.close()
+        statement.close()
+
+        return total
+    }
+
     private fun ResultSet.toConsulta(): Consulta {
         return Consulta(
             idConsulta = getInt("id_consulta"),
