@@ -2,6 +2,7 @@ package com.example.consulta.infrastructure.web
 
 import com.example.consulta.domain.model.CreateRespuestaRequest
 import com.example.consulta.domain.port.Service.RespuestaConsultaServicePort
+import com.example.shared.config.DependencyInjection.respuestaConsultaService
 import com.example.shared.security.authorizeRole
 import io.ktor.http.*
 import io.ktor.server.auth.*
@@ -73,6 +74,46 @@ class RespuestaConsultaController(
                     }
                 }
             }
+        }
+
+        // Obtener total de respuestas de un abogado
+        get("/abogado/{id}/total") {
+            val id = call.parameters["id"]
+
+            if (id == null) {
+                call.respond(HttpStatusCode.BadRequest, mapOf("error" to "ID inválido"))
+                return@get
+            }
+
+            val total = respuestaConsultaService.getTotalRespuestasByAbogadoId(id)
+            call.respond(HttpStatusCode.OK, mapOf("total" to total))
+        }
+
+        // Obtener todas las respuestas de un abogado
+        get("/abogado/{id}") {
+            val id = call.parameters["id"]
+
+            if (id == null) {
+                call.respond(HttpStatusCode.BadRequest, mapOf("error" to "ID inválido"))
+                return@get
+            }
+
+            val respuestas = respuestaConsultaService.getRespuestasByAbogadoId(id)
+            call.respond(HttpStatusCode.OK, respuestas)
+        }
+
+        // Obtener respuestas de una consulta (ya existe en /api/consultas/{consultaId}/respuestas)
+        // Este es un alias más directo
+        get("/consulta/{id}") {
+            val id = call.parameters["id"]?.toIntOrNull()
+
+            if (id == null) {
+                call.respond(HttpStatusCode.BadRequest, mapOf("error" to "ID inválido"))
+                return@get
+            }
+
+            val respuestas = respuestaConsultaService.getRespuestasByConsultaId(id)
+            call.respond(HttpStatusCode.OK, respuestas)
         }
 
         // Rutas para respuestas individuales
