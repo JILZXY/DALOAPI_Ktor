@@ -48,4 +48,24 @@ class ConsultaService(
     override suspend fun deleteConsulta(id: Int): Boolean {
         return consultaRepository.delete(id)
     }
+
+    override suspend fun getConsultasByMateria(materiaId: Int): List<Consulta> {
+        return consultaRepository.findByMateria(materiaId)
+    }
+
+    override suspend fun getConsultasByLocalidad(estadoId: Int?, municipioId: Int?): List<Consulta> {
+        return consultaRepository.findByLocalidad(estadoId, municipioId)
+    }
+
+    override suspend fun getConsultasByMateriaYLocalidad(
+        materiaId: Int,
+        estadoId: Int?,
+        municipioId: Int?
+    ): List<Consulta> {
+        return consultaRepository.findByMateriaYLocalidad(materiaId, estadoId, municipioId)
+    }
+
+    override suspend fun getTotalConsultasByUsuarioId(usuarioId: String): Int {
+        return consultaRepository.countByUsuarioId(usuarioId)
+    }
 }
