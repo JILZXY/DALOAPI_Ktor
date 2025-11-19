@@ -10,4 +10,12 @@ interface ConsultaRepositoryPort {
     suspend fun create(consulta: Consulta, especialidadesIds: List<Int>): Consulta?
     suspend fun updateEstado(id: Int, estado: String): Boolean
     suspend fun delete(id: Int): Boolean
+    suspend fun findByMateria(materiaId: Int): List<Consulta>
+    suspend fun findByLocalidad(estadoId: Int?, municipioId: Int?): List<Consulta>
+    suspend fun findByMateriaYLocalidad(
+        materiaId: Int,
+        estadoId: Int?,
+        municipioId: Int?
+    ): List<Consulta>
+    suspend fun countByUsuarioId(usuarioId: String): Int
 }
