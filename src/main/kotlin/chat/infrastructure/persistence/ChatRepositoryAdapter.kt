@@ -199,4 +199,49 @@ class ChatRepositoryAdapter(
             )
         )
     }
+
+    override suspend fun findByUsuarioIdAndNombreParticipante(
+        usuarioId: String,
+        nombre: String
+    ): List<Chat> {
+        val chats = mutableListOf<Chat>()
+        val statement = connection.prepareStatement(
+            """
+            SELECT c.id, c.usuario_cliente_id, c.usuario_abogado_id, c.fecha_inicio,
+                   uc.nombre as cliente_nombre, uc.email as cliente_email,
+                   ua.nombre as abogado_nombre, ua.email as abogado_email,
+                   a.cedula_profesional, a.calificacion_promedio
+            FROM Chats c
+            INNER JOIN Usuarios uc ON c.usuario_cliente_id = uc.id_usuario
+            INNER JOIN Usuarios ua ON c.usuario_abogado_id = ua.id_usuario
+            INNER JOIN Abogados a ON c.usuario_abogado_id = a.id_usuario
+            WHERE (c.usuario_cliente_id = ?::uuid OR c.usuario_abogado_id = ?::uuid)
+                AND (
+                    (c.usuario_cliente_id = ?::uuid AND LOWER(ua.nombre) LIKE LOWER(?))
+                    OR
+                    (c.usuario_abogado_id = ?::uuid AND LOWER(uc.nombre) LIKE LOWER(?))
+                )
+            ORDER BY c.fecha_inicio DESC
+            """
+        )
+
+        val nombrePattern = "%$nombre%"
+
+        statement.setString(1, usuarioId)
+        statement.setString(2, usuarioId)
+        statement.setString(3, usuarioId)
+        statement.setString(4, nombrePattern)
+        statement.setString(5, usuarioId)
+        statement.setString(6, nombrePattern)
+
+        val resultSet = statement.executeQuery()
+        while (resultSet.next()) {
+            chats.add(resultSet.toChat())
+        }
+
+        resultSet.close()
+        statement.close()
+
+        return chats
+    }
 }
