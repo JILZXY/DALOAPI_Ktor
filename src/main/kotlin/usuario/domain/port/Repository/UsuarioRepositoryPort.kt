@@ -1,5 +1,6 @@
 package com.example.usuario.domain.port.Repository
 
+import com.example.usuario.domain.model.Abogado
 import com.example.usuario.domain.model.Usuario
 
 interface UsuarioRepositoryPort {
@@ -7,6 +8,7 @@ interface UsuarioRepositoryPort {
     suspend fun findById(id: String): Usuario?
     suspend fun findByEmail(email: String): Usuario?
     suspend fun create(usuario: Usuario, passwordHash: String): Usuario?
+    suspend fun saveAbogadoCompleto(usuario: Usuario, passwordHash: String, abogado: Abogado, especialidadesIds: List<Int>): Usuario?
     suspend fun update(usuario: Usuario): Usuario?
     suspend fun delete(id: String): Boolean
     suspend fun findInactivos(): List<Usuario>

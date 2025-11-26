@@ -2,6 +2,7 @@ package com.example.usuario.infrastructure.web
 
 import com.example.shared.security.authorizeRole
 import com.example.usuario.domain.model.LoginRequest
+import com.example.usuario.domain.model.RegisterAbogadoRequest
 import com.example.usuario.domain.model.RegisterRequest
 import com.example.usuario.domain.model.Usuario
 import com.example.usuario.domain.port.Service.UsuarioServicePort
@@ -73,6 +74,20 @@ class UsuarioController(
                     call.respond(
                         HttpStatusCode.BadRequest,
                         mapOf("error" to "No se pudo registrar el usuario. El email puede estar en uso.")
+                    )
+                }
+            }
+
+            post("/register/abogado") {
+                val request = call.receive<RegisterAbogadoRequest>()
+                val response = usuarioService.registerAbogado(request) // Nuevo método en el servicio
+
+                if (response != null) {
+                    call.respond(HttpStatusCode.Created, response)
+                } else {
+                    call.respond(
+                        HttpStatusCode.BadRequest,
+                        mapOf("error" to "No se pudo registrar el abogado. El email puede estar en uso.")
                     )
                 }
             }

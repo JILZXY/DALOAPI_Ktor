@@ -5,6 +5,7 @@ import com.example.shared.security.PasswordHasher
 import com.example.usuario.domain.port.Repository.UsuarioRepositoryPort
 import com.example.usuario.domain.port.Service.UsuarioServicePort
 import com.example.usuario.domain.model.*
+import java.util.UUID
 
 class UsuarioService(
     private val usuarioRepository: UsuarioRepositoryPort,
@@ -43,6 +44,38 @@ class UsuarioService(
         val createdUsuario = usuarioRepository.create(usuario, passwordHash) ?: return null
 
         // Generar token
+        val token = jwtConfig.generateToken(createdUsuario.idUsuario, createdUsuario.email, createdUsuario.rolId)
+
+        return AuthResponse(token, createdUsuario)
+    }
+
+    override suspend fun registerAbogado(request: RegisterAbogadoRequest): AuthResponse? {
+        if (usuarioRepository.findByEmail(request.email) != null) {
+            return null
+        }
+
+        val passwordHash = passwordHasher.hash(request.contrasena)
+        val userId = UUID.randomUUID().toString()
+
+        val usuario = Usuario(
+            idUsuario = userId,
+            nombre = request.nombre,
+            email = request.email,
+            fechaRegistro = "",
+            municipioId = request.municipioId,
+            rolId = 2, // Rol de Abogado
+            activo = false // Inactivo hasta validación
+        )
+
+        val abogado = Abogado(
+            idUsuario = userId,
+            cedulaProfesional = request.cedulaProfesional,
+            biografia = request.biografia,
+            calificacionPromedio = 0.0
+        )
+
+        val createdUsuario = usuarioRepository.saveAbogadoCompleto(usuario, passwordHash, abogado, request.especialidadesIds) ?: return null
+
         val token = jwtConfig.generateToken(createdUsuario.idUsuario, createdUsuario.email, createdUsuario.rolId)
 
         return AuthResponse(token, createdUsuario)

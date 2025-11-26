@@ -3,10 +3,12 @@ package com.example.usuario.infrastructure.persistence
 import com.example.municipio.domain.model.Municipio
 import com.example.estado.domain.model.Estado
 import com.example.shared.domain.model.Rol
+import com.example.usuario.domain.model.Abogado
 import com.example.usuario.domain.model.Usuario
 import com.example.usuario.domain.port.Repository.UsuarioRepositoryPort
 import java.sql.Connection
 import java.sql.ResultSet
+import java.sql.SQLException
 
 class UsuarioRepositoryAdapter(
     private val connection: Connection
@@ -137,6 +139,81 @@ class UsuarioRepositoryAdapter(
         statement.close()
 
         return createdUsuario
+    }
+
+    override suspend fun saveAbogadoCompleto(usuario: Usuario, passwordHash: String, abogado: Abogado, especialidadesIds: List<Int>): Usuario? {
+        val originalAutoCommit = connection.autoCommit
+        try {
+            connection.autoCommit = false
+
+            // 1. Insertar en Usuarios
+            val userStatement = connection.prepareStatement(
+                """
+                INSERT INTO Usuarios (id_usuario, nombre, email, contrasena, municipio_id, rol_id, activo)
+                VALUES (?::uuid, ?, ?, ?, ?, ?, ?)
+                RETURNING fecha_registro
+                """
+            )
+            userStatement.setString(1, usuario.idUsuario)
+            userStatement.setString(2, usuario.nombre)
+            userStatement.setString(3, usuario.email)
+            userStatement.setString(4, passwordHash)
+            if (usuario.municipioId != null) {
+                userStatement.setInt(5, usuario.municipioId)
+            } else {
+                userStatement.setNull(5, java.sql.Types.INTEGER)
+            }
+            userStatement.setInt(6, usuario.rolId)
+            userStatement.setBoolean(7, usuario.activo)
+
+            val userResultSet = userStatement.executeQuery()
+            val fechaRegistro = if (userResultSet.next()) {
+                userResultSet.getTimestamp("fecha_registro").toString()
+            } else {
+                throw SQLException("Fallo al crear el usuario, no se retornaron datos.")
+            }
+            userResultSet.close()
+            userStatement.close()
+
+            // 2. Insertar en Abogados
+            val abogadoStatement = connection.prepareStatement(
+                """
+                INSERT INTO Abogados (id_usuario, cedula_profesional, biografia)
+                VALUES (?::uuid, ?, ?)
+                """
+            )
+            abogadoStatement.setString(1, abogado.idUsuario)
+            abogadoStatement.setString(2, abogado.cedulaProfesional)
+            abogadoStatement.setString(3, abogado.biografia)
+            abogadoStatement.executeUpdate()
+            abogadoStatement.close()
+
+            // 3. Insertar en Abogado_Especialidades
+            val especialidadStatement = connection.prepareStatement(
+                """
+                INSERT INTO Abogado_Especialidades (id_usuario, id_especialidad)
+                VALUES (?::uuid, ?)
+                """
+            )
+            for (especialidadId in especialidadesIds) {
+                especialidadStatement.setString(1, usuario.idUsuario)
+                especialidadStatement.setInt(2, especialidadId)
+                especialidadStatement.addBatch()
+            }
+            especialidadStatement.executeBatch()
+            especialidadStatement.close()
+
+            connection.commit()
+
+            return usuario.copy(fechaRegistro = fechaRegistro)
+
+        } catch (e: SQLException) {
+            connection.rollback()
+            // Log error
+            return null
+        } finally {
+            connection.autoCommit = originalAutoCommit
+        }
     }
 
     override suspend fun update(usuario: Usuario): Usuario? {
