@@ -74,7 +74,7 @@ class UsuarioService(
             calificacionPromedio = 0.0
         )
 
-        val createdUsuario = usuarioRepository.saveAbogadoCompleto(usuario, passwordHash, abogado, request.especialidadesIds) ?: return null
+        val createdUsuario = usuarioRepository.saveAbogadoCompleto(usuario, abogado, passwordHash, request.especialidadesIds) ?: return null
 
         val token = jwtConfig.generateToken(createdUsuario.idUsuario, createdUsuario.email, createdUsuario.rolId)
 
