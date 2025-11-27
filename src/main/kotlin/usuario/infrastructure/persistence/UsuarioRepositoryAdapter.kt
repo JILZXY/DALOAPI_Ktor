@@ -141,78 +141,73 @@ class UsuarioRepositoryAdapter(
         return createdUsuario
     }
 
-    override suspend fun saveAbogadoCompleto(usuario: Usuario, passwordHash: String, abogado: Abogado, especialidadesIds: List<Int>): Usuario? {
-        val originalAutoCommit = connection.autoCommit
+    override suspend fun saveAbogadoCompleto(
+        usuario: Usuario,
+        abogado: Abogado,
+        passwordHash: String,
+        especialidadesIds: List<Int>
+    ): Usuario? {
         try {
-            connection.autoCommit = false
+            connection.autoCommit = false // Iniciar transacción
 
-            // 1. Insertar en Usuarios
-            val userStatement = connection.prepareStatement(
+            // 1. Insertar Usuario
+            val stmtUsuario = connection.prepareStatement(
                 """
-                INSERT INTO Usuarios (id_usuario, nombre, email, contrasena, municipio_id, rol_id, activo)
-                VALUES (?::uuid, ?, ?, ?, ?, ?, ?)
-                RETURNING fecha_registro
-                """
+            INSERT INTO Usuarios (nombre, email, contrasena, municipio_id, rol_id, activo)
+            VALUES (?, ?, ?, ?, ?, ?)
+            RETURNING id_usuario, fecha_registro
+            """
             )
-            userStatement.setString(1, usuario.idUsuario)
-            userStatement.setString(2, usuario.nombre)
-            userStatement.setString(3, usuario.email)
-            userStatement.setString(4, passwordHash)
-            if (usuario.municipioId != null) {
-                userStatement.setInt(5, usuario.municipioId)
-            } else {
-                userStatement.setNull(5, java.sql.Types.INTEGER)
-            }
-            userStatement.setInt(6, usuario.rolId)
-            userStatement.setBoolean(7, usuario.activo)
+            stmtUsuario.setString(1, usuario.nombre)
+            stmtUsuario.setString(2, usuario.email)
+            stmtUsuario.setString(3, passwordHash) // Necesitas pasar el hash
+            usuario.municipioId?.let { stmtUsuario.setInt(4, it) } ?: stmtUsuario.setNull(4, java.sql.Types.INTEGER)
+            stmtUsuario.setInt(5, 2) // rol abogado
+            stmtUsuario.setBoolean(6, false) // inactivo
 
-            val userResultSet = userStatement.executeQuery()
-            val fechaRegistro = if (userResultSet.next()) {
-                userResultSet.getTimestamp("fecha_registro").toString()
-            } else {
-                throw SQLException("Fallo al crear el usuario, no se retornaron datos.")
+            val rsUsuario = stmtUsuario.executeQuery()
+            if (!rsUsuario.next()) {
+                connection.rollback()
+                return null
             }
-            userResultSet.close()
-            userStatement.close()
 
-            // 2. Insertar en Abogados
-            val abogadoStatement = connection.prepareStatement(
+            val usuarioId = rsUsuario.getString("id_usuario")
+
+            // 2. Insertar Abogado
+            val stmtAbogado = connection.prepareStatement(
                 """
-                INSERT INTO Abogados (id_usuario, cedula_profesional, biografia)
-                VALUES (?::uuid, ?, ?)
-                """
+            INSERT INTO Abogados (id_usuario, cedula_profesional, biografia, calificacion_promedio)
+            VALUES (?::uuid, ?, ?, 0.00)
+            """
             )
-            abogadoStatement.setString(1, abogado.idUsuario)
-            abogadoStatement.setString(2, abogado.cedulaProfesional)
-            abogadoStatement.setString(3, abogado.biografia)
-            abogadoStatement.executeUpdate()
-            abogadoStatement.close()
+            stmtAbogado.setString(1, usuarioId)
+            stmtAbogado.setString(2, abogado.cedulaProfesional)
+            stmtAbogado.setString(3, abogado.biografia)
+            stmtAbogado.executeUpdate()
 
-            // 3. Insertar en Abogado_Especialidades
-            val especialidadStatement = connection.prepareStatement(
+            // 3. Insertar Especialidades
+            val stmtEsp = connection.prepareStatement(
                 """
-                INSERT INTO Abogado_Especialidades (id_usuario, id_especialidad)
-                VALUES (?::uuid, ?)
-                """
+            INSERT INTO Abogado_Especialidad (id_abogado, id_catalogo_especialidad)
+            VALUES (?::uuid, ?)
+            """
             )
-            for (especialidadId in especialidadesIds) {
-                especialidadStatement.setString(1, usuario.idUsuario)
-                especialidadStatement.setInt(2, especialidadId)
-                especialidadStatement.addBatch()
+            for (espId in especialidadesIds) {
+                stmtEsp.setString(1, usuarioId)
+                stmtEsp.setInt(2, espId)
+                stmtEsp.addBatch()
             }
-            especialidadStatement.executeBatch()
-            especialidadStatement.close()
+            stmtEsp.executeBatch()
 
-            connection.commit()
+            connection.commit() // Confirmar transacción
+            connection.autoCommit = true
 
-            return usuario.copy(fechaRegistro = fechaRegistro)
+            return usuario.copy(idUsuario = usuarioId)
 
-        } catch (e: SQLException) {
+        } catch (e: Exception) {
             connection.rollback()
-            // Log error
+            connection.autoCommit = true
             return null
-        } finally {
-            connection.autoCommit = originalAutoCommit
         }
     }
 

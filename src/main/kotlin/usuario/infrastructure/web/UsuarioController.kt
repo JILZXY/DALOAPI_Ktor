@@ -80,14 +80,14 @@ class UsuarioController(
 
             post("/register/abogado") {
                 val request = call.receive<RegisterAbogadoRequest>()
-                val response = usuarioService.registerAbogado(request) // Nuevo método en el servicio
+                val response = usuarioService.registerAbogado(request)
 
                 if (response != null) {
                     call.respond(HttpStatusCode.Created, response)
                 } else {
                     call.respond(
                         HttpStatusCode.BadRequest,
-                        mapOf("error" to "No se pudo registrar el abogado. El email puede estar en uso.")
+                        mapOf("error" to "No se pudo registrar el abogado. Verifica que el email no esté en uso y que la cédula sea válida.")
                     )
                 }
             }
