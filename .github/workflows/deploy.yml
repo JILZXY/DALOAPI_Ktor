@@ -43,7 +43,7 @@ jobs:
       - name: Verify Artifacts
         run: |
           if [ ! -f "app.jar" ]; then echo "❌ app.jar no encontrado"; exit 1; fi
-          if [ ! -f "src/main/resources/application.conf" ]; then echo "❌ application.conf no encontrado"; exit 1; fi
+          if [ ! -f "src/main/resources/application.yaml" ]; then echo "❌ application.yaml no encontrado"; exit 1; fi
           echo "✅ Todos los archivos listos."
 
       # ------------------------------------------------------------------
@@ -67,7 +67,7 @@ jobs:
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_SSH_PRIVATE_KEY }}
           # Subimos el JAR y el archivo de configuración a la vez
-          source: "app.jar,src/main/resources/application.conf"
+          source: "app.jar,src/main/resources/application.yaml"
           target: "/tmp/deploy"
 
       # ------------------------------------------------------------------
@@ -87,11 +87,11 @@ jobs:
             
             # 2. Mover la Configuración (Aplanando la ruta)
             # El SCP crea carpetas anidadas (src/main...), esto encuentra el archivo y lo mueve directo
-            find /tmp/deploy -name "application.conf" -exec mv {} /opt/apps/backend/application.conf \;
+            find /tmp/deploy -name "application.yaml" -exec mv {} /opt/apps/backend/application.yaml \;
             
             # 3. Asegurar permisos (Usuario git_deploy debe ser el dueño)
             sudo chown git_deploy:deployers /opt/apps/backend/app.jar
-            sudo chown git_deploy:deployers /opt/apps/backend/application.conf
+            sudo chown git_deploy:deployers /opt/apps/backend/application.yaml
             
             # 4. Limpiar basura temporal
             rm -rf /tmp/deploy/*
