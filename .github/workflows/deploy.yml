@@ -67,14 +67,26 @@ jobs:
           fi
         shell: bash
 
+      - name: Prepare private key and known_hosts in workspace
+        id: prepare_key
+        run: |
+          set -e
+          mkdir -p "$GITHUB_WORKSPACE/.ssh"
+          # Convierte secuencias literales "\n" a saltos de línea reales y quita CRs
+          printf '%b' "${{ secrets.EC2_SSH_PRIVATE_KEY }}" | tr -d '\r' > "$GITHUB_WORKSPACE/.ssh/id_rsa"
+          chmod 600 "$GITHUB_WORKSPACE/.ssh/id_rsa"
+          # Añadir host key para evitar prompts interactivos
+          ssh-keyscan -H "${{ secrets.EC2_HOST }}" >> "$GITHUB_WORKSPACE/.ssh/known_hosts" || true
+          echo "key_path=$GITHUB_WORKSPACE/.ssh/id_rsa" >> $GITHUB_OUTPUT
+        shell: bash
+
       - name: Execute pre-deployment script on EC2 (Stop old app)
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USER }}
-          key: ${{ secrets.EC2_SSH_PRIVATE_KEY }}
+          key_path: ${{ steps.prepare_key.outputs.key_path }}
           script: |
-            # Ejecutar script de pre-deploy con sudo preservando el entorno
             sudo -E /opt/apps/backend/scripts/pre-deploy
 
       - name: Copy JAR to EC2
@@ -82,7 +94,7 @@ jobs:
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USER }}
-          key: ${{ secrets.EC2_SSH_PRIVATE_KEY }}
+          key_path: ${{ steps.prepare_key.outputs.key_path }}
           source: "${{ steps.move_jar.outputs.moved_jar_filename }}"
           target: "/opt/apps/backend/"
 
@@ -91,6 +103,13 @@ jobs:
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USER }}
-          key: ${{ secrets.EC2_SSH_PRIVATE_KEY }}
+          key_path: ${{ steps.prepare_key.outputs.key_path }}
           script: |
             sudo -E /opt/apps/backend/scripts/post-deploy
+
+      - name: Cleanup private key and known_hosts
+        if: always()
+        run: |
+          rm -f "$GITHUB_WORKSPACE/.ssh/id_rsa"
+          rm -f "$GITHUB_WORKSPACE/.ssh/known_hosts"
+        shell: bash
