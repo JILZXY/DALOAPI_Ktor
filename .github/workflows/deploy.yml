@@ -1,115 +1,100 @@
-name: Deploy Java App to Amazon EC2
+name: Deploy API to EC2
 
 on:
   push:
-    branches:
-      - main
-  workflow_dispatch:
-    inputs:
-      branch:
-        description: 'Rama a desplegar'
-        required: true
-        default: 'develop'
+    branches: [ "main" ]
 
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
 
     steps:
+      # ------------------------------------------------------------------
+      # FASE 1: PREPARACIÓN Y COMPILACIÓN
+      # ------------------------------------------------------------------
       - name: Checkout code
         uses: actions/checkout@v4
-        with:
-          ref: ${{ github.event.inputs.branch || github.ref }}
 
-      - name: Setup on jdk 21
+      - name: Set up JDK 21
         uses: actions/setup-java@v4
         with:
-          distribution: microsoft
           java-version: '21'
-          cache: 'gradle'
+          distribution: 'temurin'
 
-      - name: Make Gradle wrapper executable
+      - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
-      - name: Build with Gradle and Shadowjar
-        run: ./gradlew clean shadowjar
+      # Compila el proyecto generando el Fat JAR (ShadowJar)
+      - name: Build with Gradle
+        run: ./gradlew clean shadowJar
 
-      - name: Print generated JAR path
-        run: find build/libs -name "*.jar" -print
-
-      - name: Move JAR to root for SCP
-        id: move_jar
+      # Busca el JAR generado y lo renombra a 'app.jar' para estandarizar
+      - name: Prepare JAR
         run: |
-          JAR_FULL_PATH=$(find build/libs -name "*.jar" | head -n 1 || true)
-          if [ -z "$JAR_FULL_PATH" ]; then
-            echo "No se encontró JAR en build/libs"
-            exit 1
+          # Intenta encontrar el jar que termina en -all.jar (típico de Ktor/Shadow)
+          if ls build/libs/*-all.jar 1> /dev/null 2>&1; then
+            mv build/libs/*-all.jar app.jar
+          else
+            # Si no, toma el primer jar que encuentre
+            mv build/libs/*.jar app.jar
           fi
-          JAR_FILENAME=$(basename "$JAR_FULL_PATH")
-          mv "$JAR_FULL_PATH" "$JAR_FILENAME"
-          echo "JAR movido a la raíz: $JAR_FILENAME"
-          echo "moved_jar_filename=$JAR_FILENAME" >> $GITHUB_OUTPUT
-        shell: bash
 
-      - name: Validate required secrets
+      # Verifica que el JAR exista antes de intentar subirlo
+      - name: Verify Artifacts
         run: |
-          if [ -z "${{ secrets.EC2_SSH_PRIVATE_KEY }}" ]; then
-            echo "El secret EC2_SSH_PRIVATE_KEY no está configurado"
-            exit 1
-          fi
-          if [ -z "${{ secrets.EC2_HOST }}" ]; then
-            echo "El secret EC2_HOST no está configurado"
-            exit 1
-          fi
-          if [ -z "${{ secrets.EC2_USER }}" ]; then
-            echo "El secret EC2_USER no está configurado"
-            exit 1
-          fi
-        shell: bash
+          if [ ! -f "app.jar" ]; then echo "❌ app.jar no encontrado"; exit 1; fi
+          if [ ! -f "src/main/resources/application.conf" ]; then echo "❌ application.conf no encontrado"; exit 1; fi
+          echo "✅ Todos los archivos listos."
 
-      - name: Prepare private key and known_hosts in workspace
-        id: prepare_key
-        run: |
-          set -e
-          mkdir -p "$GITHUB_WORKSPACE/.ssh"
-          # Convierte secuencias literales "\n" a saltos de línea reales y quita CRs
-          printf '%b' "${{ secrets.EC2_SSH_PRIVATE_KEY }}" | tr -d '\r' > "$GITHUB_WORKSPACE/.ssh/id_rsa"
-          chmod 600 "$GITHUB_WORKSPACE/.ssh/id_rsa"
-          # Añadir host key para evitar prompts interactivos
-          ssh-keyscan -H "${{ secrets.EC2_HOST }}" >> "$GITHUB_WORKSPACE/.ssh/known_hosts" || true
-          echo "key_path=$GITHUB_WORKSPACE/.ssh/id_rsa" >> $GITHUB_OUTPUT
-        shell: bash
+      # ------------------------------------------------------------------
+      # FASE 2: DESPLIEGUE A ZONA SEGURA (/tmp)
+      # ------------------------------------------------------------------
 
-      - name: Execute pre-deployment script on EC2 (Stop old app)
+      # Primero detenemos el servicio para liberar memoria
+      - name: Stop Service
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USER }}
-          key_path: ${{ steps.prepare_key.outputs.key_path }}
-          script: |
-            sudo -E /opt/apps/backend/scripts/pre-deploy
+          key: ${{ secrets.EC2_SSH_PRIVATE_KEY }}
+          script: sudo /opt/apps/backend/scripts/pre-deploy
 
-      - name: Copy JAR to EC2
-        uses: appleboy/scp-action@v1
+      # Subimos los archivos a una carpeta temporal donde siempre tenemos permiso
+      - name: Upload to Tmp
+        uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USER }}
-          key_path: ${{ steps.prepare_key.outputs.key_path }}
-          source: "${{ steps.move_jar.outputs.moved_jar_filename }}"
-          target: "/opt/apps/backend/"
+          key: ${{ secrets.EC2_SSH_PRIVATE_KEY }}
+          # Subimos el JAR y el archivo de configuración a la vez
+          source: "app.jar,src/main/resources/application.conf"
+          target: "/tmp/deploy"
 
-      - name: Execute post-deployment script on EC2 (Restart app and configure systemd)
+      # ------------------------------------------------------------------
+      # FASE 3: INSTALACIÓN Y ARRANQUE
+      # ------------------------------------------------------------------
+
+      # Movemos los archivos de /tmp a /opt/apps/backend y reiniciamos
+      - name: Deploy & Start
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USER }}
-          key_path: ${{ steps.prepare_key.outputs.key_path }}
+          key: ${{ secrets.EC2_SSH_PRIVATE_KEY }}
           script: |
-            sudo -E /opt/apps/backend/scripts/post-deploy
-
-      - name: Cleanup private key and known_hosts
-        if: always()
-        run: |
-          rm -f "$GITHUB_WORKSPACE/.ssh/id_rsa"
-          rm -f "$GITHUB_WORKSPACE/.ssh/known_hosts"
-        shell: bash
+            # 1. Mover el JAR (Sobrescribir el anterior)
+            mv /tmp/deploy/app.jar /opt/apps/backend/app.jar
+            
+            # 2. Mover la Configuración (Aplanando la ruta)
+            # El SCP crea carpetas anidadas (src/main...), esto encuentra el archivo y lo mueve directo
+            find /tmp/deploy -name "application.conf" -exec mv {} /opt/apps/backend/application.conf \;
+            
+            # 3. Asegurar permisos (Usuario git_deploy debe ser el dueño)
+            sudo chown git_deploy:deployers /opt/apps/backend/app.jar
+            sudo chown git_deploy:deployers /opt/apps/backend/application.conf
+            
+            # 4. Limpiar basura temporal
+            rm -rf /tmp/deploy/*
+            
+            # 5. Arrancar el servicio
+            sudo /opt/apps/backend/scripts/post-deploy
