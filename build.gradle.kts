@@ -34,4 +34,5 @@ dependencies {
     implementation(libs.hikariCP)
     implementation(libs.jbcrypt)
     implementation(libs.aws.sdk.kotlin.s3)
+    implementation("io.ktor:ktor-server-cors-jvm")
 }
