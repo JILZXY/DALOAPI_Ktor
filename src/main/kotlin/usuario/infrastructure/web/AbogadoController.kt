@@ -122,6 +122,53 @@ class AbogadoController(
                 call.respond(HttpStatusCode.OK, especialidades)
             }
 
+            get("/buscar/especialidad/{especialidadId}") {
+                val especialidadId = call.parameters["especialidadId"]?.toIntOrNull()
+
+                if (especialidadId == null) {
+                    call.respond(
+                        HttpStatusCode.BadRequest,
+                        mapOf("error" to "ID de especialidad inválido")
+                    )
+                    return@get
+                }
+
+                val abogados = abogadoService.buscarPorEspecialidad(especialidadId)
+                call.respond(HttpStatusCode.OK, abogados)
+            }
+
+// GET /api/abogados/buscar/estado/{estadoId}
+            get("/buscar/estado/{estadoId}") {
+                val estadoId = call.parameters["estadoId"]?.toIntOrNull()
+
+                if (estadoId == null) {
+                    call.respond(
+                        HttpStatusCode.BadRequest,
+                        mapOf("error" to "ID de estado inválido")
+                    )
+                    return@get
+                }
+
+                val abogados = abogadoService.buscarPorEstado(estadoId)
+                call.respond(HttpStatusCode.OK, abogados)
+            }
+
+// GET /api/abogados/buscar/municipio/{municipioId}
+            get("/buscar/municipio/{municipioId}") {
+                val municipioId = call.parameters["municipioId"]?.toIntOrNull()
+
+                if (municipioId == null) {
+                    call.respond(
+                        HttpStatusCode.BadRequest,
+                        mapOf("error" to "ID de municipio inválido")
+                    )
+                    return@get
+                }
+
+                val abogados = abogadoService.buscarPorMunicipio(municipioId)
+                call.respond(HttpStatusCode.OK, abogados)
+            }
+
             // Rutas protegidas
             authenticate("auth-jwt") {
                 put("/{id}") {
