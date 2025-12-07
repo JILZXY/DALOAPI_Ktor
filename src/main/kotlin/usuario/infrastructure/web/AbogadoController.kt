@@ -169,6 +169,21 @@ class AbogadoController(
                 call.respond(HttpStatusCode.OK, abogados)
             }
 
+            get("/buscar/especialidad/{especialidadId}") {
+                val especialidadId = call.parameters["especialidadId"]?.toIntOrNull()
+
+                if (especialidadId == null) {
+                    call.respond(
+                        HttpStatusCode.BadRequest,
+                        mapOf("error" to "ID de especialidad inválido")
+                    )
+                    return@get
+                }
+
+                val abogados = abogadoService.buscarPorEspecialidad(especialidadId)
+                call.respond(HttpStatusCode.OK, abogados)
+            }
+
             // Rutas protegidas
             authenticate("auth-jwt") {
                 put("/{id}") {
