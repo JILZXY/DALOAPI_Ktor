@@ -2,7 +2,6 @@ package com.example.usuario.domain.port.Repository
 
 import com.example.shared.domain.model.Especialidad
 import com.example.usuario.domain.model.Abogado
-import com.example.usuario.domain.model.AbogadoConUsuario
 
 interface AbogadoRepositoryPort {
     suspend fun findAll(): List<Abogado>
@@ -19,7 +18,7 @@ interface AbogadoRepositoryPort {
         ordenarPorCalificacion: Boolean
     ): List<Abogado>
     suspend fun getEspecialidadesByAbogadoId(abogadoId: String): List<Especialidad>
-    suspend fun buscarPorEspecialidad(especialidadId: Int): List<AbogadoConUsuario>
-    suspend fun buscarPorEstado(estadoId: Int): List<AbogadoConUsuario>
-    suspend fun buscarPorMunicipio(municipioId: Int): List<AbogadoConUsuario>
+    suspend fun findActivosByEspecialidadOnly(especialidadId: Int): List<Abogado>
+    suspend fun findActivosByMunicipioOnly(municipioId: Int): List<Abogado>
+    suspend fun findActivosByEstadoOnly(estadoId: Int): List<Abogado>
 }

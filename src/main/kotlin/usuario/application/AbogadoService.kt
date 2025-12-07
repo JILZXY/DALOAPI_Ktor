@@ -4,7 +4,7 @@ import com.example.usuario.domain.model.Abogado
 import com.example.usuario.domain.port.Service.AbogadoServicePort
 import com.example.usuario.domain.port.Repository.AbogadoRepositoryPort
 import com.example.shared.domain.model.Especialidad
-import com.example.usuario.domain.model.AbogadoConUsuario
+
 class AbogadoService(
     private val abogadoRepository: AbogadoRepositoryPort
 ) : AbogadoServicePort {
@@ -51,15 +51,15 @@ class AbogadoService(
         return abogadoRepository.getEspecialidadesByAbogadoId(abogadoId)
     }
 
-    override suspend fun buscarPorEspecialidad(especialidadId: Int): List<AbogadoConUsuario> {
-        return abogadoRepository.buscarPorEspecialidad(especialidadId)
+    override suspend fun getAbogadosByEspecialidadOnly(especialidadId: Int): List<Abogado> {
+        return abogadoRepository.findActivosByEspecialidadOnly(especialidadId)
     }
 
-    override suspend fun buscarPorEstado(estadoId: Int): List<AbogadoConUsuario> {
-        return abogadoRepository.buscarPorEstado(estadoId)
+    override suspend fun getAbogadosByMunicipioOnly(municipioId: Int): List<Abogado> {
+        return abogadoRepository.findActivosByMunicipioOnly(municipioId)
     }
 
-    override suspend fun buscarPorMunicipio(municipioId: Int): List<AbogadoConUsuario> {
-        return abogadoRepository.buscarPorMunicipio(municipioId)
+    override suspend fun getAbogadosByEstadoOnly(estadoId: Int): List<Abogado> {
+        return abogadoRepository.findActivosByEstadoOnly(estadoId)
     }
 }

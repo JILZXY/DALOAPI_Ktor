@@ -297,28 +297,28 @@ class AbogadoRepositoryAdapter(
         return abogados
     }
 
-    override suspend fun buscarPorEspecialidad(especialidadId: Int): List<AbogadoConUsuario> {
-        val abogados = mutableListOf<AbogadoConUsuario>()
-
+    override suspend fun findActivosByEspecialidadOnly(especialidadId: Int): List<Abogado> {
+        val abogados = mutableListOf<Abogado>()
         val statement = connection.prepareStatement(
             """
-        SELECT DISTINCT
-            a.id_abogado, a.id_usuario, a.cedula_profesional, a.biografia, a.calificacion_promedio,
-            u.nombre, u.email, u.municipio_id,
-            m.estado_id
-        FROM Abogados a
-        INNER JOIN Usuarios u ON a.id_usuario = u.id_usuario
-        INNER JOIN Abogado_Especialidad ae ON a.id_abogado = ae.id_abogado
-        LEFT JOIN Municipios m ON u.municipio_id = m.id
-        WHERE ae.id_catalogo_especialidad = ? AND u.activo = true
-        ORDER BY a.calificacion_promedio DESC
-        """
+            SELECT DISTINCT
+                a.id_usuario, a.cedula_profesional, a.biografia, a.calificacion_promedio,
+                u.nombre, u.email, u.fecha_registro, u.municipio_id, u.rol_id, u.activo
+            FROM Abogados a
+            INNER JOIN Usuarios u ON a.id_usuario = u.id_usuario
+            INNER JOIN Abogado_Especialidad ae ON a.id_usuario = ae.id_abogado
+            WHERE u.activo = true AND ae.id_catalogo_especialidad = ?
+            ORDER BY a.calificacion_promedio DESC
+            """
         )
         statement.setInt(1, especialidadId)
 
         val resultSet = statement.executeQuery()
         while (resultSet.next()) {
-            abogados.add(resultSet.toAbogadoConUsuario())
+            val abogado = resultSet.toAbogado()
+            abogados.add(abogado.copy(
+                especialidades = getEspecialidadesByAbogado(abogado.idUsuario)
+            ))
         }
 
         resultSet.close()
@@ -327,56 +327,27 @@ class AbogadoRepositoryAdapter(
         return abogados
     }
 
-    override suspend fun buscarPorEstado(estadoId: Int): List<AbogadoConUsuario> {
-        val abogados = mutableListOf<AbogadoConUsuario>()
-
+    override suspend fun findActivosByMunicipioOnly(municipioId: Int): List<Abogado> {
+        val abogados = mutableListOf<Abogado>()
         val statement = connection.prepareStatement(
             """
-        SELECT DISTINCT
-            a.id_abogado, a.id_usuario, a.cedula_profesional, a.biografia, a.calificacion_promedio,
-            u.nombre, u.email, u.municipio_id,
-            m.estado_id
-        FROM Abogados a
-        INNER JOIN Usuarios u ON a.id_usuario = u.id_usuario
-        INNER JOIN Municipios m ON u.municipio_id = m.id
-        WHERE m.estado_id = ? AND u.activo = true
-        ORDER BY a.calificacion_promedio DESC
-        """
-        )
-        statement.setInt(1, estadoId)
-
-        val resultSet = statement.executeQuery()
-        while (resultSet.next()) {
-            abogados.add(resultSet.toAbogadoConUsuario())
-        }
-
-        resultSet.close()
-        statement.close()
-
-        return abogados
-    }
-
-    override suspend fun buscarPorMunicipio(municipioId: Int): List<AbogadoConUsuario> {
-        val abogados = mutableListOf<AbogadoConUsuario>()
-
-        val statement = connection.prepareStatement(
+            SELECT DISTINCT
+                a.id_usuario, a.cedula_profesional, a.biografia, a.calificacion_promedio,
+                u.nombre, u.email, u.fecha_registro, u.municipio_id, u.rol_id, u.activo
+            FROM Abogados a
+            INNER JOIN Usuarios u ON a.id_usuario = u.id_usuario
+            WHERE u.activo = true AND u.municipio_id = ?
+            ORDER BY a.calificacion_promedio DESC
             """
-        SELECT DISTINCT
-            a.id_abogado, a.id_usuario, a.cedula_profesional, a.biografia, a.calificacion_promedio,
-            u.nombre, u.email, u.municipio_id,
-            m.estado_id
-        FROM Abogados a
-        INNER JOIN Usuarios u ON a.id_usuario = u.id_usuario
-        LEFT JOIN Municipios m ON u.municipio_id = m.id
-        WHERE u.municipio_id = ? AND u.activo = true
-        ORDER BY a.calificacion_promedio DESC
-        """
         )
         statement.setInt(1, municipioId)
 
         val resultSet = statement.executeQuery()
         while (resultSet.next()) {
-            abogados.add(resultSet.toAbogadoConUsuario())
+            val abogado = resultSet.toAbogado()
+            abogados.add(abogado.copy(
+                especialidades = getEspecialidadesByAbogado(abogado.idUsuario)
+            ))
         }
 
         resultSet.close()
@@ -385,33 +356,34 @@ class AbogadoRepositoryAdapter(
         return abogados
     }
 
-    private fun ResultSet.toAbogadoConUsuario(): AbogadoConUsuario {
-        val idUsuario = getString("id_usuario")
-        val especialidades = getEspecialidadesByAbogado(idUsuario)
-
-        return AbogadoConUsuario(
-            abogado = Abogado(
-                idUsuario = idUsuario,
-                cedulaProfesional = getString("cedula_profesional"),
-                biografia = getString("biografia"),
-                calificacionPromedio = getDouble("calificacion_promedio"),
-                usuario = Usuario(
-                    idUsuario = idUsuario,
-                    nombre = getString("nombre"),
-                    email = getString("email"),
-                    fechaRegistro = "", // No viene en el SELECT
-                    municipioId = getInt("municipio_id").let { if (wasNull()) null else it },
-                    rolId = 0, // No viene en el SELECT, puedes agregarlo si lo necesitas
-                    activo = true
-                ),
-                especialidades = especialidades
-            ),
-            nombreUsuario = getString("nombre"),
-            email = getString("email"),
-            estadoId = getInt("estado_id").let { if (wasNull()) null else it },
-            municipioId = getInt("municipio_id").let { if (wasNull()) null else it },
-            localidadId = null // Ya no existe en la BD
+    override suspend fun findActivosByEstadoOnly(estadoId: Int): List<Abogado> {
+        val abogados = mutableListOf<Abogado>()
+        val statement = connection.prepareStatement(
+            """
+            SELECT DISTINCT
+                a.id_usuario, a.cedula_profesional, a.biografia, a.calificacion_promedio,
+                u.nombre, u.email, u.fecha_registro, u.municipio_id, u.rol_id, u.activo
+            FROM Abogados a
+            INNER JOIN Usuarios u ON a.id_usuario = u.id_usuario
+            LEFT JOIN Municipios m ON u.municipio_id = m.id
+            WHERE u.activo = true AND m.estado_id = ?
+            ORDER BY a.calificacion_promedio DESC
+            """
         )
+        statement.setInt(1, estadoId)
+
+        val resultSet = statement.executeQuery()
+        while (resultSet.next()) {
+            val abogado = resultSet.toAbogado()
+            abogados.add(abogado.copy(
+                especialidades = getEspecialidadesByAbogado(abogado.idUsuario)
+            ))
+        }
+
+        resultSet.close()
+        statement.close()
+
+        return abogados
     }
 
     override suspend fun getEspecialidadesByAbogadoId(abogadoId: String): List<Especialidad> {
