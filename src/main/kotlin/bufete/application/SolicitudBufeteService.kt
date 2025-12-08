@@ -9,7 +9,6 @@ import com.example.calificacion.domain.port.Repository.CalificacionRepositoryPor
 class SolicitudBufeteService(
     private val solicitudRepository: SolicitudBufeteRepositoryPort,
     private val bufeteRepository: BufeteRepositoryPort,
-    private val calificacionRepository: CalificacionRepositoryPort,
     private val solicitudBufeteRepository: SolicitudBufeteRepositoryPort
 
 ) : SolicitudBufeteServicePort {

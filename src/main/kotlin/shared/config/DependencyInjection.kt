@@ -196,7 +196,7 @@ object DependencyInjection {
     }
 
     val solicitudBufeteService: SolicitudBufeteServicePort by lazy {
-        SolicitudBufeteService(solicitudBufeteRepository, bufeteRepository, calificacionRepository)
+        SolicitudBufeteService(solicitudBufeteRepository, bufeteRepository, solicitudBufeteRepository)
     }
 
     val solicitudBufeteController: SolicitudBufeteController by lazy {
