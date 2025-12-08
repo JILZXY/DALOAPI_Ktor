@@ -160,6 +160,22 @@ class SolicitudBufeteRepositoryAdapter(
         return rowsAffected > 0
     }
 
+    override suspend fun deleteByAbogadoAndBufete(abogadoId: String, bufeteId: Int): Boolean {
+        val statement = connection.prepareStatement(
+            """
+            DELETE FROM Solicitudes_Bufete
+            WHERE abogado_id = ?::uuid AND bufete_id = ? AND estado = 'Aprobado'
+            """
+        )
+        statement.setString(1, abogadoId)
+        statement.setInt(2, bufeteId)
+
+        val rowsAffected = statement.executeUpdate()
+        statement.close()
+
+        return rowsAffected > 0
+    }
+
     private fun ResultSet.toSolicitudBufete(): SolicitudBufete {
         return SolicitudBufete(
             id = getInt("id"),

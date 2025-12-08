@@ -41,6 +41,20 @@ class BufeteController(
                 }
             }
 
+            // Buscar abogados de un bufete por especialidad
+            get("/{bufeteId}/abogados/especialidad/{especialidadId}") {
+                val bufeteId = call.parameters["bufeteId"]?.toIntOrNull()
+                val especialidadId = call.parameters["especialidadId"]?.toIntOrNull()
+
+                if (bufeteId == null || especialidadId == null) {
+                    call.respond(HttpStatusCode.BadRequest, mapOf("error" to "IDs inválidos"))
+                    return@get
+                }
+
+                val abogados = bufeteService.getAbogadosByBufeteYEspecialidad(bufeteId, especialidadId)
+                call.respond(HttpStatusCode.OK, abogados)
+            }
+
             // Protegidas
             authenticate("auth-jwt") {
 

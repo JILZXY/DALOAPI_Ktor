@@ -4,6 +4,7 @@ import com.example.bufete.domain.model.Bufete
 import com.example.bufete.domain.model.CreateBufeteRequest
 import com.example.bufete.domain.port.Service.BufeteServicePort
 import com.example.bufete.domain.port.Repository.BufeteRepositoryPort
+import com.example.usuario.domain.model.Abogado
 
 class BufeteService(
     private val bufeteRepository: BufeteRepositoryPort
@@ -38,5 +39,9 @@ class BufeteService(
 
     override suspend fun deleteBufete(id: Int): Boolean {
         return bufeteRepository.delete(id)
+    }
+
+    override suspend fun getAbogadosByBufeteYEspecialidad(bufeteId: Int, especialidadId: Int): List<Abogado> {
+        return bufeteRepository.findAbogadosByBufeteYEspecialidad(bufeteId, especialidadId)
     }
 }

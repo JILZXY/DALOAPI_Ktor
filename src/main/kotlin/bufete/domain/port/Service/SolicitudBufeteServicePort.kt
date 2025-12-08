@@ -10,4 +10,5 @@ interface SolicitudBufeteServicePort {
     suspend fun createSolicitud(abogadoId: String, bufeteId: Int): SolicitudBufete?
     suspend fun aprobarSolicitud(id: Int): Boolean
     suspend fun rechazarSolicitud(id: Int): Boolean
+    suspend fun salirDelBufete(abogadoId: String, bufeteId: Int): Boolean
 }

@@ -9,7 +9,9 @@ import com.example.calificacion.domain.port.Repository.CalificacionRepositoryPor
 class SolicitudBufeteService(
     private val solicitudRepository: SolicitudBufeteRepositoryPort,
     private val bufeteRepository: BufeteRepositoryPort,
-    private val calificacionRepository: CalificacionRepositoryPort
+    private val calificacionRepository: CalificacionRepositoryPort,
+    private val solicitudBufeteRepository: SolicitudBufeteRepositoryPort
+
 ) : SolicitudBufeteServicePort {
 
     override suspend fun getAllSolicitudes(): List<SolicitudBufete> {
@@ -55,5 +57,9 @@ class SolicitudBufeteService(
 
     override suspend fun rechazarSolicitud(id: Int): Boolean {
         return solicitudRepository.updateEstado(id, "Rechazado")
+    }
+
+    override suspend fun salirDelBufete(abogadoId: String, bufeteId: Int): Boolean {
+        return solicitudBufeteRepository.deleteByAbogadoAndBufete(abogadoId, bufeteId)
     }
 }

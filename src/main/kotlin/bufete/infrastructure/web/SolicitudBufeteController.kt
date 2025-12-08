@@ -4,6 +4,7 @@ import com.example.bufete.domain.model.CreateSolicitudBufeteRequest
 import com.example.bufete.domain.model.UpdateSolicitudEstadoRequest
 import com.example.bufete.domain.port.Service.SolicitudBufeteServicePort
 import com.example.bufete.domain.port.Service.BufeteServicePort
+import com.example.shared.config.DependencyInjection.solicitudBufeteService
 import com.example.shared.security.authorizeRole
 import io.ktor.http.*
 import io.ktor.server.auth.*
@@ -24,6 +25,31 @@ class SolicitudBufeteController(
 
                 // Solo abogados pueden solicitar unirse
                 authorizeRole(2) {
+
+                    delete("/{bufeteId}/salir") {
+                        val bufeteId = call.parameters["bufeteId"]?.toIntOrNull()
+                        val principal = call.principal<JWTPrincipal>()
+                        val abogadoId = principal?.payload?.getClaim("userId")?.asString()
+
+                        if (bufeteId == null) {
+                            call.respond(HttpStatusCode.BadRequest, mapOf("error" to "ID de bufete inválido"))
+                            return@delete
+                        }
+
+                        if (abogadoId == null) {
+                            call.respond(HttpStatusCode.Unauthorized, mapOf("error" to "Abogado no identificado"))
+                            return@delete
+                        }
+
+                        val result = solicitudBufeteService.salirDelBufete(abogadoId, bufeteId)
+
+                        if (result) {
+                            call.respond(HttpStatusCode.OK, mapOf("message" to "Has salido del bufete exitosamente"))
+                        } else {
+                            call.respond(HttpStatusCode.BadRequest, mapOf("error" to "No perteneces a este bufete o no se pudo completar la operación"))
+                        }
+                    }
+
                     post {
                         val principal = call.principal<JWTPrincipal>()
                         val abogadoId = principal?.payload?.getClaim("userId")?.asString()

@@ -3,6 +3,8 @@ package com.example.bufete.infrastructure.persistence
 import com.example.bufete.domain.model.Bufete
 import com.example.bufete.domain.port.Repository.BufeteRepositoryPort
 import com.example.shared.domain.model.Especialidad
+import com.example.usuario.domain.model.Abogado
+import com.example.usuario.domain.model.Usuario
 import java.sql.Connection
 import java.sql.ResultSet
 
@@ -202,6 +204,54 @@ class BufeteRepositoryAdapter(
 
         statement.executeBatch()
         statement.close()
+    }
+
+    override suspend fun findAbogadosByBufeteYEspecialidad(bufeteId: Int, especialidadId: Int): List<Abogado> {
+        val abogados = mutableListOf<Abogado>()
+        val statement = connection.prepareStatement(
+            """
+            SELECT DISTINCT
+                a.id_usuario, a.cedula_profesional, a.biografia, a.calificacion_promedio,
+                u.nombre, u.email, u.fecha_registro, u.municipio_id, u.rol_id, u.activo
+            FROM Abogados a
+            INNER JOIN Usuarios u ON a.id_usuario = u.id_usuario
+            INNER JOIN Solicitudes_Bufete sb ON a.id_usuario = sb.abogado_id
+            INNER JOIN Abogado_Especialidad ae ON a.id_usuario = ae.id_abogado
+            WHERE sb.bufete_id = ? 
+                AND sb.estado = 'Aprobado'
+                AND ae.id_catalogo_especialidad = ?
+                AND u.activo = true
+            ORDER BY a.calificacion_promedio DESC
+            """
+        )
+        statement.setInt(1, bufeteId)
+        statement.setInt(2, especialidadId)
+
+        val resultSet = statement.executeQuery()
+        while (resultSet.next()) {
+            abogados.add(
+                Abogado(
+                    idUsuario = resultSet.getString("id_usuario"),
+                    cedulaProfesional = resultSet.getString("cedula_profesional"),
+                    biografia = resultSet.getString("biografia"),
+                    calificacionPromedio = resultSet.getDouble("calificacion_promedio"),
+                    usuario = Usuario(
+                        idUsuario = resultSet.getString("id_usuario"),
+                        nombre = resultSet.getString("nombre"),
+                        email = resultSet.getString("email"),
+                        fechaRegistro = resultSet.getTimestamp("fecha_registro").toString(),
+                        municipioId = resultSet.getInt("municipio_id").let { if (resultSet.wasNull()) null else it },
+                        rolId = resultSet.getInt("rol_id"),
+                        activo = resultSet.getBoolean("activo")
+                    )
+                )
+            )
+        }
+
+        resultSet.close()
+        statement.close()
+
+        return abogados
     }
 
     private fun getEspecialidadesByBufete(bufeteId: Int): List<Especialidad> {

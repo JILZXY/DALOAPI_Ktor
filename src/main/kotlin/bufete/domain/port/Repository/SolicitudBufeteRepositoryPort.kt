@@ -9,4 +9,5 @@ interface SolicitudBufeteRepositoryPort {
     suspend fun findByAbogadoId(abogadoId: String): List<SolicitudBufete>
     suspend fun create(solicitud: SolicitudBufete): SolicitudBufete?
     suspend fun updateEstado(id: Int, estado: String): Boolean
+    suspend fun deleteByAbogadoAndBufete(abogadoId: String, bufeteId: Int): Boolean
 }
